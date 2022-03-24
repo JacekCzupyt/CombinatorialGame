@@ -24,10 +24,13 @@ namespace CombinatorialGameLibrary {
         }
 
         public VictoryState MakeMove(int m) {
+            if (State.GameEnded)
+                throw new InvalidOperationException("Game has already ended");
             if (m < 0 || m >= N)
                 throw new ArgumentException("m not int range");
             if (GameList[m] != 0)
                 throw new ArgumentException("m is already colored");
+
 
             GameList[m] = ActivePlayer;
             ActivePlayer = -ActivePlayer;
