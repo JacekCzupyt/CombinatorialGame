@@ -9,7 +9,7 @@ namespace CombinatorialGameLibrary {
 
         private readonly Dictionary<int, IGamePlayer> _players;
 
-        public event Action<int> MoveComplete;
+        public event Action<int, int> MoveComplete;
 
         public bool PauseGame { get; set; }
         public bool GamePaused { get; private set; }
@@ -42,14 +42,11 @@ namespace CombinatorialGameLibrary {
         }
 
         private void RequestMove(Exception e = null) {
-            var request = new MoveRequest(_gameController, _gameController.ActivePlayer, e);
-            request.MoveEvent += MakeMove;
+            var request = new MoveRequest(_gameController, _gameController.ActivePlayer, MakeMove, e);
             _players[_gameController.ActivePlayer].RequestMove(request);
         }
 
-        private void MakeMove(int move, MoveRequest request) {
-            request.MoveEvent -= MakeMove;
-
+        private void MakeMove(int move) {
             VictoryState result;
             
             try {
@@ -59,16 +56,16 @@ namespace CombinatorialGameLibrary {
                 RequestMove(e);
                 return;
             }
-            
-            MoveComplete?.Invoke(request.PlayerIndex);
 
             if (result.GameEnded)
                 return;
 
             if (PauseGame) {
                 GamePaused = true;
+                MoveComplete?.Invoke(-_gameController.ActivePlayer, move);
             }
             else {
+                MoveComplete?.Invoke(-_gameController.ActivePlayer, move);
                 RequestMove();
             }
         }

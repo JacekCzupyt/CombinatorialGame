@@ -10,10 +10,4 @@ namespace CombinatorialGameLibrary {
         VictoryState EndGameState { get; }
         IReadOnlyList<int> History { get; }
     }
-
-    public interface IGameController : IGameState {
-        VictoryState MakeMove(int m);
-        
-        void UndoMove();
-    }
 }
