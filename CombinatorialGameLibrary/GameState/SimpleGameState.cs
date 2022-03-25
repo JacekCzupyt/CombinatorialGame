@@ -20,7 +20,7 @@ namespace CombinatorialGameLibrary {
             K = k;
             ActivePlayer = 1;
 
-            _gameList = new List<int>(N);
+            _gameList = new List<int>(new int[N]);
             for (int i = 0; i < N; i++)
                 _gameList[i] = 0;
 
