@@ -6,11 +6,14 @@ namespace CombinatorialGameLibrary {
         int N { get; }
         int K { get; }
         int ActivePlayer { get; }
-        List<int> GameList { get; }
-        VictoryState State { get; }
+        IReadOnlyList<int> GameList { get; }
+        VictoryState EndGameState { get; }
+        IReadOnlyList<int> History { get; }
     }
 
-    public interface IChangeableGameState : IGameState {
+    public interface IGameController : IGameState {
         VictoryState MakeMove(int m);
+        
+        void UndoMove();
     }
 }

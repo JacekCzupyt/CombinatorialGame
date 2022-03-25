@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace CombinatorialGameLibrary {
     public class GameManager {
-        private readonly IChangeableGameState _gameState;
+        private readonly IGameController _gameController;
 
-        public IGameState GameState => _gameState;
+        public IGameState GameController => _gameController;
 
         private readonly Dictionary<int, IGamePlayer> _players;
 
@@ -14,9 +14,9 @@ namespace CombinatorialGameLibrary {
         public bool PauseGame { get; set; }
         public bool GamePaused { get; private set; }
 
-        public GameManager(IGamePlayer player1, IGamePlayer player2, IChangeableGameState gameState, bool pauseGame = false) {
+        public GameManager(IGamePlayer player1, IGamePlayer player2, IGameController gameController, bool pauseGame = false) {
             _players = new Dictionary<int, IGamePlayer> {{1, player1}, {-1, player2}};
-            this._gameState = gameState;
+            this._gameController = gameController;
             PauseGame = pauseGame;
         }
 
@@ -42,9 +42,9 @@ namespace CombinatorialGameLibrary {
         }
 
         private void RequestMove(Exception e = null) {
-            var request = new MoveRequest(_gameState, _gameState.ActivePlayer, e);
+            var request = new MoveRequest(_gameController, _gameController.ActivePlayer, e);
             request.MoveEvent += MakeMove;
-            _players[_gameState.ActivePlayer].RequestMove(request);
+            _players[_gameController.ActivePlayer].RequestMove(request);
         }
 
         private void MakeMove(int move, MoveRequest request) {
@@ -53,7 +53,7 @@ namespace CombinatorialGameLibrary {
             VictoryState result;
             
             try {
-                result = _gameState.MakeMove(move);
+                result = _gameController.MakeMove(move);
             }
             catch (ArgumentException e) {
                 RequestMove(e);
