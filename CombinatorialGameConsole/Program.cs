@@ -1,22 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using CombinatorialGameLibrary;
 using CombinatorialGameLibrary.GameController;
+using CombinatorialGameLibrary.GameManagement;
 using CombinatorialGameLibrary.GameState;
 
 namespace CombinatorialGameConsole {
     class Program {
-        static void Main(string[] args) {
-            var game = new SimpleGameController(10, 4);
-            while (!game.EndGameState.GameEnded) {
-                DisplayGame(game);
-                int val = int.Parse(Console.ReadLine());
-                game.MakeMove(val-1);
-                Console.Clear();
-            }
+        static async Task Main(string[] args) {
+            var player1 = new ConsolePlayer("Player1");
+            var player2 = new ConsolePlayer("Player2");
+            
+            var gameManager = new SimpleGameController(10, 4);
 
-            DisplayGame(game);
-            Console.WriteLine($"Player {game.EndGameState.Winner} has won!");
+            var game = new GameManager(player1, player2, gameManager);
+
+            game.MoveComplete += (_, _) => {
+                Console.Clear();
+                DisplayGame(game.GameState);
+            };
+            
+            DisplayGame(game.GameState);
+
+            var res = await game.PlayGame();
+            
+            Console.WriteLine($"Player {res.Winner} has won!");
         }
 
         static void DisplayGame(IGameState state) {

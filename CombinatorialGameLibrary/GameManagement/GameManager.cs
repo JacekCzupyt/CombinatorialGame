@@ -8,7 +8,7 @@ namespace CombinatorialGameLibrary.GameManagement {
     public class GameManager {
         private readonly IGameController _gameController;
 
-        public IGameState GameController => _gameController;
+        public IGameState GameState => _gameController;
 
         private readonly Dictionary<int, IGamePlayer> _players;
 
@@ -38,10 +38,12 @@ namespace CombinatorialGameLibrary.GameManagement {
             while (true) {
                 int move;
                 (move, result) = await RequestMove();
-                
-                if (result.GameEnded)
+
+                if (result.GameEnded) {
+                    MoveComplete?.Invoke(-_gameController.ActivePlayer, move);
                     break;
-                
+                }
+
                 if (PauseGameAfterMove) {
                     GamePaused = true;
                     gamePause = new TaskCompletionSource();
@@ -52,7 +54,7 @@ namespace CombinatorialGameLibrary.GameManagement {
                 if (PauseGameAfterMove)
                     await gamePause.Task;
             }
-
+            
             GameComplete?.Invoke(result);
             return result;
         }
@@ -73,7 +75,7 @@ namespace CombinatorialGameLibrary.GameManagement {
             Exception err = null;
             while(true) {
                 try {
-                    var request = new MoveRequest(GameController, GameController.ActivePlayer, err);
+                    var request = new MoveRequest(GameState, GameState.ActivePlayer, err);
                     int move = await _players[_gameController.ActivePlayer].RequestMove(request);
                     return (move, _gameController.MakeMove(move));
                 }
