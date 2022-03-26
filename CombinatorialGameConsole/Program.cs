@@ -11,15 +11,19 @@ namespace CombinatorialGameConsole {
     class Program {
         static async Task Main(string[] args) {
             var player1 = new ConsolePlayer("Player1");
-            var player2 = new ConsolePlayer("Player2");
+            var player2 = new MinMaxAiPlayer();
             
-            var gameManager = new SimpleGameController(10, 4);
+            var gameManager = new SimpleGameController(10, 3);
 
-            var game = new GameManager(player1, player2, gameManager);
+            var game = new GameManager(player1, player2, gameManager, true);
 
-            game.MoveComplete += (_, _) => {
+            game.MoveComplete += (player, _) => {
                 Console.Clear();
                 DisplayGame(game.GameState);
+                if (player == 1)
+                    Console.ReadKey();
+                if(game.GamePaused)
+                    game.ResumeGame();
             };
             
             DisplayGame(game.GameState);
