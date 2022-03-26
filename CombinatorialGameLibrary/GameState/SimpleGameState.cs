@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
+﻿using System.Collections.Generic;
 
-namespace CombinatorialGameLibrary {
+namespace CombinatorialGameLibrary.GameState {
     public class SimpleGameState : IGameState {
         public int N { get; }
         public int K { get; }

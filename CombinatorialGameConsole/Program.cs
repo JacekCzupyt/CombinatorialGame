@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using CombinatorialGameLibrary;
+using CombinatorialGameLibrary.GameController;
+using CombinatorialGameLibrary.GameState;
 
 namespace CombinatorialGameConsole {
     class Program {

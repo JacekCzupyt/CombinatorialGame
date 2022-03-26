@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Linq;
+using CombinatorialGameLibrary.GameState;
 
-namespace CombinatorialGameLibrary {
+namespace CombinatorialGameLibrary.GameController {
     public class SimpleGameController : SimpleGameState, IGameController {
         
         public SimpleGameController(int n, int k) : base(n, k) { }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace CombinatorialGameLibrary {
+namespace CombinatorialGameLibrary.GameState {
     public interface IGameState : ICloneable {
         int N { get; }
         int K { get; }

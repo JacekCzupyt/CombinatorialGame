@@ -1,4 +1,4 @@
-﻿namespace CombinatorialGameLibrary {
+﻿namespace CombinatorialGameLibrary.GameState {
     public struct VictoryState {
         public bool GameEnded;
         public int? Winner;

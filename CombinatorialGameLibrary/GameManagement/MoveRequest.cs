@@ -1,6 +1,7 @@
 ﻿using System;
+using CombinatorialGameLibrary.GameState;
 
-namespace CombinatorialGameLibrary {
+namespace CombinatorialGameLibrary.GameManagement {
     public struct MoveRequest {
         public IGameState GameState;
         public int PlayerIndex;

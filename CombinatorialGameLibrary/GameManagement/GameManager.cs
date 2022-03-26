@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using CombinatorialGameLibrary.GameController;
+using CombinatorialGameLibrary.GameState;
 
-namespace CombinatorialGameLibrary {
+namespace CombinatorialGameLibrary.GameManagement {
     public class GameManager {
         private readonly IGameController _gameController;
 
