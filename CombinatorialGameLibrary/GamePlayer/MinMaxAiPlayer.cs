@@ -11,7 +11,7 @@ namespace CombinatorialGameLibrary.GamePlayer {
             return Task.Run(() => MinMax(controller).Item1);
         }
 
-        //TODO: alpha-beta, translations
+        //TODO: translations
 
         public static (int, int) MinMax(IGameController controller) {
             int currentPlayer = controller.ActivePlayer;
@@ -23,9 +23,13 @@ namespace CombinatorialGameLibrary.GamePlayer {
                     continue;
 
                 int moveRes = TestMove(controller, i);
+                int moveScore = moveRes * currentPlayer;
+                
+                if(moveScore == 1)
+                    return (i, moveScore);
 
-                if (moveRes * currentPlayer > bestResVal) {
-                    bestResVal = moveRes * currentPlayer;
+                if (moveScore > bestResVal) {
+                    bestResVal = moveScore;
                     bestResInd = i;
                 }
             }

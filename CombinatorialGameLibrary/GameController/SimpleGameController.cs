@@ -53,7 +53,7 @@ namespace CombinatorialGameLibrary.GameController {
                         return new VictoryState{GameEnded = true, Winner = -c, SequenceStart = pos, SequenceJump = j};
                 }
             }
-            return GameList.All(x => x != 0) ?
+            return History.Count >= N ?
                 VictoryState.Tie :
                 VictoryState.None;
         }
