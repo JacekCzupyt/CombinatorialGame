@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using CombinatorialGameLibrary;
 using CombinatorialGameLibrary.GameController;
 using CombinatorialGameLibrary.GameManagement;
+using CombinatorialGameLibrary.GamePlayer;
 using CombinatorialGameLibrary.GameState;
 
 namespace CombinatorialGameConsole {

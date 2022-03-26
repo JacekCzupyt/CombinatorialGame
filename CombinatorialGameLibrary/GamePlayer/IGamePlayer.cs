@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
+using CombinatorialGameLibrary.GameManagement;
 
-namespace CombinatorialGameLibrary.GameManagement {
+namespace CombinatorialGameLibrary.GamePlayer {
     public interface IGamePlayer {
         Task<int> RequestMove(MoveRequest request);
     }

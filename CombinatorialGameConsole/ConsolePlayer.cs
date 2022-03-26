@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CombinatorialGameLibrary.GameManagement;
+using CombinatorialGameLibrary.GamePlayer;
 
 namespace CombinatorialGameConsole {
     public class ConsolePlayer : IGamePlayer {
