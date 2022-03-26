@@ -6,10 +6,40 @@ using CombinatorialGameLibrary.GameController;
 using CombinatorialGameLibrary.GameManagement;
 using CombinatorialGameLibrary.GamePlayer;
 using CombinatorialGameLibrary.GameState;
+using CombinatorialGameLibrary.Utils;
 
 namespace CombinatorialGameConsole {
     class Program {
         static async Task Main(string[] args) {
+            SolveGames(11, 6);
+        }
+
+        static void SolveGames(int maxN, int maxK) {
+            var res = new int[maxN-1, maxK-1];
+            
+            for (int n = 2; n <= maxN; n++) {
+                for (int k = 2; k <= maxK; k++) {
+                    res[n-2, k-2] = StateSolver.SolveState(n, k);
+                }
+            }
+
+            var dispDict = new Dictionary<int, (ConsoleColor, string)>() {
+                { 0, (default, "0") },
+                { 1, (ConsoleColor.Cyan, "1") },
+                { -1, (ConsoleColor.Red, "2") }
+            };
+
+            for (int n = 0; n < maxN-1; n++) {
+                for (int k = 0; k < maxK-1; k++) {
+                    var disp = dispDict[res[n, k]];
+                    Console.ForegroundColor = disp.Item1;
+                    Console.Write(disp.Item2 + " ");
+                }
+                Console.Write("\n");
+            }
+        }
+
+        static async Task PlayGame() {
             var player1 = new ConsolePlayer("Player1");
             var player2 = new MinMaxAiPlayer();
             

@@ -7,18 +7,13 @@ using CombinatorialGameLibrary.GameManagement;
 namespace CombinatorialGameLibrary.GamePlayer {
     public class MinMaxAiPlayer : IGamePlayer {
         public Task<int> RequestMove(MoveRequest request) {
-            return Task.Run(() => CalculateNextMove(request));
+            var controller = new SimpleGameController(request.GameState);
+            return Task.Run(() => MinMax(controller).Item1);
         }
 
-        private int CalculateNextMove(MoveRequest request) {
-            var controller = new SimpleGameController(request.GameState);
-            var res = MinMax(controller);
-            return res.Item1;
-        }
-        
         //TODO: alpha-beta, translations
 
-        private (int, int) MinMax(IGameController controller) {
+        public static (int, int) MinMax(IGameController controller) {
             int currentPlayer = controller.ActivePlayer;
 
             int bestResVal = -2, bestResInd = -1;
@@ -41,7 +36,7 @@ namespace CombinatorialGameLibrary.GamePlayer {
             return (bestResInd, bestResVal);
         }
 
-        private int TestMove(IGameController controller, int move) {
+        private static int TestMove(IGameController controller, int move) {
             var victoryState = controller.MakeMove(move);
             int res;
             if (victoryState.GameEnded) {
@@ -49,7 +44,7 @@ namespace CombinatorialGameLibrary.GamePlayer {
                 res = victoryState.Winner.Value;
             }
             else {
-                res = MinMax(controller).Item2;
+                res = MinMax(controller).Item2 * controller.ActivePlayer;
             }
             controller.UndoMove();
             return res;
