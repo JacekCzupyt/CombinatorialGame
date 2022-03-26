@@ -1,7 +1,7 @@
-﻿using System.Reflection.Metadata;
+﻿using System.Threading.Tasks;
 
 namespace CombinatorialGameLibrary {
     public interface IGamePlayer {
-        void RequestMove(MoveRequest request);
+        Task<int> RequestMove(MoveRequest request);
     }
 }

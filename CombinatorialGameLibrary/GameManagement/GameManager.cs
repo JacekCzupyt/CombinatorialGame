@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CombinatorialGameLibrary {
     public class GameManager {
@@ -10,27 +11,52 @@ namespace CombinatorialGameLibrary {
         private readonly Dictionary<int, IGamePlayer> _players;
 
         public event Action<int, int> MoveComplete;
+        public event Action<VictoryState> GameComplete;
 
-        public bool PauseGame { get; set; }
+        public bool PauseGameAfterMove { get; set; }
         public bool GamePaused { get; private set; }
 
-        public GameManager(IGamePlayer player1, IGamePlayer player2, IGameController gameController, bool pauseGame = false) {
-            _players = new Dictionary<int, IGamePlayer> {{1, player1}, {-1, player2}};
+        public GameManager(IGamePlayer player1, IGamePlayer player2, IGameController gameController, bool pauseGameAfterMove = false) {
+            _players = new Dictionary<int, IGamePlayer> { { 1, player1 }, { -1, player2 } };
             this._gameController = gameController;
-            PauseGame = pauseGame;
+            PauseGameAfterMove = pauseGameAfterMove;
         }
 
         public bool GameStarted { get; private set; } = false;
-        
-        public void Begin() {
+
+        private TaskCompletionSource gamePause;
+
+        public async Task<VictoryState> PlayGame() {
             if (GameStarted)
                 throw new InvalidOperationException("Game already ongoing");
             GameStarted = true;
-            RequestMove();
+            
+            VictoryState result;
+
+            while (true) {
+                int move;
+                (move, result) = await RequestMove();
+                
+                if (result.GameEnded)
+                    break;
+                
+                if (PauseGameAfterMove) {
+                    GamePaused = true;
+                    gamePause = new TaskCompletionSource();
+                }
+                
+                MoveComplete?.Invoke(-_gameController.ActivePlayer, move);
+                
+                if (PauseGameAfterMove)
+                    await gamePause.Task;
+            }
+
+            GameComplete?.Invoke(result);
+            return result;
         }
 
         public void ResumeGame() {
-            if (!PauseGame)
+            if (!PauseGameAfterMove)
                 throw new InvalidOperationException("This game does not pause in between moves");
             if (!GameStarted)
                 throw new InvalidOperationException("This game has not started yet");
@@ -38,35 +64,20 @@ namespace CombinatorialGameLibrary {
                 throw new InvalidOperationException("The game isn't paused");
 
             GamePaused = false;
-            RequestMove();
+            gamePause.SetResult();
         }
 
-        private void RequestMove(Exception e = null) {
-            var request = new MoveRequest(_gameController, _gameController.ActivePlayer, MakeMove, e);
-            _players[_gameController.ActivePlayer].RequestMove(request);
-        }
-
-        private void MakeMove(int move) {
-            VictoryState result;
-            
-            try {
-                result = _gameController.MakeMove(move);
-            }
-            catch (ArgumentException e) {
-                RequestMove(e);
-                return;
-            }
-
-            if (result.GameEnded)
-                return;
-
-            if (PauseGame) {
-                GamePaused = true;
-                MoveComplete?.Invoke(-_gameController.ActivePlayer, move);
-            }
-            else {
-                MoveComplete?.Invoke(-_gameController.ActivePlayer, move);
-                RequestMove();
+        private async Task<(int, VictoryState)> RequestMove() {
+            Exception err = null;
+            while(true) {
+                try {
+                    var request = new MoveRequest(GameController, GameController.ActivePlayer, err);
+                    int move = await _players[_gameController.ActivePlayer].RequestMove(request);
+                    return (move, _gameController.MakeMove(move));
+                }
+                catch (ArgumentException e) {
+                    err = e;
+                }
             }
         }
     }
