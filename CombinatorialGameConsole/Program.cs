@@ -11,7 +11,7 @@ using CombinatorialGameLibrary.Utils;
 namespace CombinatorialGameConsole {
     class Program {
         static async Task Main(string[] args) {
-            SolveGames(11, 6);
+            await PlayGame();
         }
 
         static void SolveGames(int maxN, int maxK) {
