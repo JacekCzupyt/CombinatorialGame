@@ -15,12 +15,18 @@ using System.Windows.Shapes;
 
 namespace CombinatorialGameFrontend {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for GamePage.xaml
     /// </summary>
-    public partial class MainWindow : Window {
-        public MainWindow() {
+    public partial class GamePage : Page {
+        public GamePage() {
             InitializeComponent();
-            MainFrame.Navigate(new GamePage());
+            InitializeBoard(10);
+        }
+
+        private void InitializeBoard(int n) {
+            for(int i = 0; i < n; i++) {
+                GameBoard.Children.Add(new Button() { Content = i.ToString(), Style = Resources["GameTile"] as Style });
+            }
         }
     }
 }
