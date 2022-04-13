@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using CombinatorialGameLibrary.GameManagement;
 
 namespace CombinatorialGameFrontend {
     /// <summary>
@@ -20,7 +21,11 @@ namespace CombinatorialGameFrontend {
     public partial class MainWindow : Window {
         public MainWindow() {
             InitializeComponent();
-            MainFrame.Navigate(new GamePage());
+            MainFrame.Navigate(new GameConfigPage(SwitchToGameScene));
+        }
+
+        private void SwitchToGameScene(GameManager manager) {
+            MainFrame.Navigate(new GamePage(manager));
         }
     }
 }

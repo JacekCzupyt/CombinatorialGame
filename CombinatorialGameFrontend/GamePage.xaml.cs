@@ -12,15 +12,18 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using CombinatorialGameLibrary.GameManagement;
 
 namespace CombinatorialGameFrontend {
     /// <summary>
     /// Interaction logic for GamePage.xaml
     /// </summary>
     public partial class GamePage : Page {
-        public GamePage() {
+        public GameManager Manager { get; }
+        public GamePage(GameManager manager) {
+            Manager = manager;
             InitializeComponent();
-            InitializeBoard(10);
+            InitializeBoard(Manager.GameState.N);
         }
 
         private void InitializeBoard(int n) {

@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Xml;
+using CombinatorialGameLibrary.GameController;
 using CombinatorialGameLibrary.GameManagement;
 using CombinatorialGameLibrary.GamePlayer;
 
@@ -14,7 +15,8 @@ namespace CombinatorialGameFrontend {
     /// Interaction logic for GameConfigPage.xaml
     /// </summary>
     public partial class GameConfigPage : Page {
-        
+        private Action<GameManager> StartGame { get; }
+
         private const int MaxN = 10;
         private const int MaxK = 5;
 
@@ -28,7 +30,8 @@ namespace CombinatorialGameFrontend {
             new PlayerInitializer {Name = "MinMax", PlayerFactory = (() => new MinMaxAiPlayer())}
         };
 
-        public GameConfigPage() {
+        public GameConfigPage(Action<GameManager> startGame) {
+            StartGame = startGame;
             InitializeComponent();
             InitializePlayerSelection();
         }
@@ -74,7 +77,7 @@ namespace CombinatorialGameFrontend {
 
         private void SubmitButton_OnClick(object sender, RoutedEventArgs e) {
             try {
-                ValidateInputs();
+                StartGame(ValidateInputs());
             }
             catch (Exception err) {
                 ErrorText.Text = err.Message;
@@ -102,7 +105,11 @@ namespace CombinatorialGameFrontend {
             if (k is <= 0 or > MaxK)
                 throw new Exception($"K must be between 1 and {MaxK}");
 
-            return null;
+            return new GameManager(
+                (Player1Box.SelectedItem as PlayerInitializer?).Value.PlayerFactory(),
+                (Player1Box.SelectedItem as PlayerInitializer?).Value.PlayerFactory(),
+                new SimpleGameController(n, k)
+            );
         }
     }
 }
