@@ -24,11 +24,13 @@
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="5px">N</TextBlock>
         <TextBox Grid.Row="0" Grid.Column="1" x:Name="NTextbox" Margin="5px" 
-                 DataObject.Pasting="TextBoxPasting" PreviewTextInput="PreviewTextInputHandler"/>
+                 DataObject.Pasting="TextBoxPasting" PreviewTextInput="PreviewTextInputHandler"
+                 Text="5"/>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="5px">K</TextBlock>
         <TextBox Grid.Row="1" Grid.Column="1" x:Name="KTextbox" Margin="5px"
-                 DataObject.Pasting="TextBoxPasting" PreviewTextInput="PreviewTextInputHandler"/>
+                 DataObject.Pasting="TextBoxPasting" PreviewTextInput="PreviewTextInputHandler"
+                 Text="3"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="5px">Player 1</TextBlock>
         <ComboBox Grid.Row="2" Grid.Column="1" Margin="5px" x:Name="Player1Box">

@@ -20,7 +20,7 @@ namespace CombinatorialGameFrontend {
         private const int MaxN = 10;
         private const int MaxK = 5;
 
-        private struct PlayerInitializer {
+        private class PlayerInitializer {
             public string Name { get; set; }
             public Func<IGamePlayer> PlayerFactory { get; set; }
         }
@@ -79,7 +79,7 @@ namespace CombinatorialGameFrontend {
             try {
                 StartGame(ValidateInputs());
             }
-            catch (Exception err) {
+            catch (ArgumentException err) {
                 ErrorText.Text = err.Message;
             }
         }
@@ -90,24 +90,24 @@ namespace CombinatorialGameFrontend {
                 n = int.Parse(NTextbox.Text);
             }
             catch {
-                throw new Exception("N is not a valid integer");
+                throw new ArgumentException("N is not a valid integer");
             }
             if (n is <= 0 or > MaxN)
-                throw new Exception($"N must be between 1 and {MaxN}");
+                throw new ArgumentException($"N must be between 1 and {MaxN}");
             
             int k;
             try {
                 k = int.Parse(KTextbox.Text);
             }
             catch {
-                throw new Exception("K is not a valid integer");
+                throw new ArgumentException("K is not a valid integer");
             }
             if (k is <= 0 or > MaxK)
-                throw new Exception($"K must be between 1 and {MaxK}");
+                throw new ArgumentException($"K must be between 1 and {MaxK}");
 
             return new GameManager(
-                (Player1Box.SelectedItem as PlayerInitializer?).Value.PlayerFactory(),
-                (Player1Box.SelectedItem as PlayerInitializer?).Value.PlayerFactory(),
+                (Player1Box.SelectedItem as PlayerInitializer)?.PlayerFactory(),
+                (Player2Box.SelectedItem as PlayerInitializer)?.PlayerFactory(),
                 new SimpleGameController(n, k)
             );
         }
