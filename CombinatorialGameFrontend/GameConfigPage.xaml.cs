@@ -26,7 +26,7 @@ namespace CombinatorialGameFrontend {
         }
 
         private readonly List<PlayerInitializer> AvailablePlayers = new() {
-            new PlayerInitializer {Name = "Player", PlayerFactory = (() => null)},
+            new PlayerInitializer {Name = "Player", PlayerFactory = (() => UserGamePlayer.Instance)},
             new PlayerInitializer {Name = "MinMax", PlayerFactory = (() => new MinMaxAiPlayer())}
         };
 
