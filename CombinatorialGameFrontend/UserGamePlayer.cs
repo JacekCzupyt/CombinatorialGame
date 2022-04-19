@@ -12,7 +12,7 @@ namespace CombinatorialGameFrontend {
         public Task<int> RequestMove(MoveRequest request) {
             Request = request;
             moveResult = new TaskCompletionSource<int>();
-            NotifyMove?.Invoke();
+            NotifyMove?.Invoke(request);
             moveRequested = true;
             return moveResult.Task;
         }
@@ -21,7 +21,7 @@ namespace CombinatorialGameFrontend {
         private TaskCompletionSource<int> moveResult;
         private bool moveRequested;
 
-        public event Action NotifyMove;
+        public event Action<MoveRequest> NotifyMove;
 
         public void MakeMove(int move) {
             if (moveRequested) {

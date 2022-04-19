@@ -13,6 +13,8 @@
             <Setter Property="Width" Value="50px"/>
             <Setter Property="Height" Value="50px"/>
             <Setter Property="Margin" Value="2px"/>
+            <Setter Property="BorderThickness" Value="3px"/>
+            <Setter Property="BorderBrush" Value="Black"/>
         </Style>
     </Page.Resources>
 

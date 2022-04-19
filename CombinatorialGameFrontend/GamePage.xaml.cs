@@ -37,40 +37,79 @@ namespace CombinatorialGameFrontend {
         private void InitializeBoard(int n) {
             for(int i = 0; i < n; i++) {
                 var button = new Button() { Content = (i + 1).ToString(), Style = Resources["GameTile"] as Style, Tag = i};
-                button.Background = TileColors[0];
+                button.Background = new SolidColorBrush(TileColors[0]);
                 button.Click += GameTileClick;
+                button.IsHitTestVisible = false;
                 GameTiles.Add(button);
                 GameBoard.Children.Add(button);
             }
+            UserGamePlayer.Instance.NotifyMove += EnableButtons;
         }
 
-        private static void GameTileClick(object sender, RoutedEventArgs e) {
+        private void EnableButtons(MoveRequest request) {
+            for (int i = 0; i < GameTiles.Count; i++) {
+                if (request.GameState.GameList[i] == 0) {
+                    GameTiles[i].IsHitTestVisible = true;
+                }
+            }
+        }
+
+        private void GameTileClick(object sender, RoutedEventArgs e) {
             if ((sender as Button)?.Tag is not int index)
                 throw new InvalidOperationException();
-            UserGamePlayer.Instance.MakeMove(index);
+
+            try {
+                UserGamePlayer.Instance.MakeMove(index);
+                foreach(var tile in GameTiles) {
+                    tile.IsHitTestVisible = false;
+                }
+            }
+            catch {
+                // ignored
+            }
         }
 
-        private Dictionary<int, Brush> TileColors = new Dictionary<int, Brush>() {
-            { 0, new SolidColorBrush(Colors.Silver) },
-            { 1, new SolidColorBrush(Colors.Cyan)},
-            { -1, new SolidColorBrush(Colors.PaleVioletRed)}
+        private Dictionary<int, Color> TileColors = new Dictionary<int, Color>() {
+            { 0, Colors.Silver },
+            { 1, Colors.Cyan},
+            { -1, Colors.PaleVioletRed}
         };
 
         private void UpdateBoard() {
             var state = Manager.GameState.GameList;
             for (int i = 0; i < GameTiles.Count; i++) {
-                GameTiles[i].Background = TileColors[state[i]];
+                GameTiles[i].Background = new SolidColorBrush(TileColors[state[i]]);
             }
         }
         
         private void UpdateBoard(VictoryState victory) {
             if (victory.GameEnded && victory.Winner != 0) {
                 for (int i = 0; i < Manager.GameState.K; i++) {
-                    int tile = victory.SequenceStart.Value + victory.SequenceJump.Value * i;
-                    GameTiles[tile].BorderThickness = new Thickness(10);
-                    GameTiles[tile].BorderBrush = new SolidColorBrush(Colors.Yellow);
+                    int tileIndex = victory.SequenceStart.Value + victory.SequenceJump.Value * i;
+                    var tile = GameTiles[tileIndex];
+                    tile.Background = GenerateStripedBrush(TileColors[-victory.Winner.Value], Colors.Yellow);
                 }
             }
+        }
+
+        private static Brush GenerateStripedBrush(Color color1, Color color2) {
+            LinearGradientBrush brush = new LinearGradientBrush();
+
+            brush.StartPoint = new Point(0, 0);
+            brush.EndPoint = new Point(1, 1);
+            brush.SpreadMethod = GradientSpreadMethod.Repeat;
+
+            brush.GradientStops = new GradientStopCollection(
+                new[] {
+                    new GradientStop(color1, 0),
+                    new GradientStop(color1, 0.6),
+                    new GradientStop(color2, 0.6),
+                    new GradientStop(color2, 1),
+                }
+            );
+
+            brush.RelativeTransform = new ScaleTransform(0.1, 0.1);
+            return brush;
         }
     }
 }
