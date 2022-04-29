@@ -23,20 +23,22 @@ namespace CombinatorialGameFrontend {
         public GameManager Manager { get; }
 
         private readonly List<Button> GameTiles = new();
-        public GamePage(GameManager manager) {
-            Manager = manager;
+        private GameConfigPage.GamePauseBehaviour[] PauseBehaviour { get; }
+        public GamePage((GameManager, GameConfigPage.GamePauseBehaviour[]) gameSettings) {
+            Manager = gameSettings.Item1;
+            PauseBehaviour = gameSettings.Item2;
             InitializeComponent();
             InitializeBoard(Manager.GameState.N);
 
-            manager.MoveComplete += (_, _) => UpdateBoard();
-            manager.GameComplete += UpdateBoard;
-            
+            Manager.MoveComplete += (player, _) => HandleMove(player);
+            Manager.GameComplete += UpdateBoard;
+
             Manager.PlayGame();
         }
 
         private void InitializeBoard(int n) {
-            for(int i = 0; i < n; i++) {
-                var button = new Button() { Content = (i + 1).ToString(), Style = Resources["GameTile"] as Style, Tag = i};
+            for (int i = 0; i < n; i++) {
+                var button = new Button() { Content = (i + 1).ToString(), Style = Resources["GameTile"] as Style, Tag = i };
                 button.Background = new SolidColorBrush(TileColors[0]);
                 button.Click += GameTileClick;
                 button.IsHitTestVisible = false;
@@ -69,19 +71,43 @@ namespace CombinatorialGameFrontend {
             }
         }
 
-        private Dictionary<int, Color> TileColors = new Dictionary<int, Color>() {
+        private Dictionary<int, Color> TileColors = new() {
             { 0, Colors.Silver },
-            { 1, Colors.Cyan},
-            { -1, Colors.PaleVioletRed}
+            { 1, Colors.Cyan },
+            { -1, Colors.PaleVioletRed }
         };
 
+        private void HandleMove(int player) {
+            UpdateBoard();
+            HandlePause(player);
+        }
+        
         private void UpdateBoard() {
             var state = Manager.GameState.GameList;
             for (int i = 0; i < GameTiles.Count; i++) {
                 GameTiles[i].Background = new SolidColorBrush(TileColors[state[i]]);
             }
         }
-        
+
+        private void HandlePause(int player) {
+            if (Manager.GamePaused) {
+                var behaviour = PauseBehaviour[player == 1 ?
+                    1 :
+                    0];
+
+                switch (behaviour) {
+                    case GameConfigPage.GamePauseBehaviour.Pause:
+                        break;
+                    case GameConfigPage.GamePauseBehaviour.Resume:
+                        Manager.ResumeGame();
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+            ResumeButton.IsEnabled = Manager.GamePaused;
+        }
+
         private void UpdateBoard(VictoryState victory) {
             if (victory.GameEnded && victory.Winner != 0) {
                 for (int i = 0; i < Manager.GameState.K; i++) {
@@ -110,6 +136,12 @@ namespace CombinatorialGameFrontend {
 
             brush.RelativeTransform = new ScaleTransform(0.1, 0.1);
             return brush;
+        }
+
+        private TaskCompletionSource ResumeGame;
+        private void NextButton_OnClick(object sender, RoutedEventArgs e) {
+            if(Manager.GamePaused)
+                Manager.ResumeGame();
         }
     }
 }

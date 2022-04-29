@@ -1,17 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+﻿using System.Windows;
 using CombinatorialGameLibrary.GameManagement;
 
 namespace CombinatorialGameFrontend {
@@ -24,8 +11,8 @@ namespace CombinatorialGameFrontend {
             MainFrame.Navigate(new GameConfigPage(SwitchToGameScene));
         }
 
-        private void SwitchToGameScene(GameManager manager) {
-            MainFrame.Navigate(new GamePage(manager));
+        private void SwitchToGameScene((GameManager, GameConfigPage.GamePauseBehaviour[]) gameSettings) {
+            MainFrame.Navigate(new GamePage(gameSettings));
         }
     }
 }

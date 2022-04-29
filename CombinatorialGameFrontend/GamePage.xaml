@@ -19,10 +19,12 @@
     </Page.Resources>
 
     <Grid>
-        <StackPanel x:Name="GameBoard" Orientation="Horizontal" VerticalAlignment="Top">
-
- 
-
-        </StackPanel>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <StackPanel x:Name="GameBoard" Orientation="Horizontal" VerticalAlignment="Top"/>
+        <Button Name="ResumeButton" IsEnabled="False" Grid.Row="1" Width="80" Height="30" HorizontalAlignment="Left" Click="NextButton_OnClick">Next</Button>
     </Grid>
 </Page>
