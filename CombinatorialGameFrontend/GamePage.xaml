@@ -22,6 +22,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         
         <StackPanel x:Name="GameBoard" Orientation="Horizontal" VerticalAlignment="Top"/>
@@ -29,5 +30,6 @@
             <Button Name="ResumeButton" IsEnabled="False" Width="80" Height="30" HorizontalAlignment="Left" Padding="5px" Click="NextButton_OnClick">Next</Button>
             <Button Name="RestartButton" Width="80" Height="30" HorizontalAlignment="Left" Padding="5px" Click="RestartButton_OnClick">Restart</Button>
         </StackPanel>
+        <TextBlock Name="VictoryText" Grid.Row="2" HorizontalAlignment="Left" FontSize="20"></TextBlock>
     </Grid>
 </Page>

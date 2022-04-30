@@ -21,12 +21,12 @@ namespace CombinatorialGameFrontend {
     /// Interaction logic for GamePage.xaml
     /// </summary>
     public partial class GamePage : Page {
-        public GameManager Manager { get; }
+        private GameManager Manager { get; }
 
         private readonly List<Button> GameTiles = new();
         private GameConfigPage.GamePauseBehaviour[] PauseBehaviour { get; }
 
-        private Task<VictoryState> GameTask = null;
+        private Task<VictoryState> _gameTask;
         public GamePage((GameManager, GameConfigPage.GamePauseBehaviour[]) gameSettings) {
             Manager = gameSettings.Item1;
             PauseBehaviour = gameSettings.Item2;
@@ -35,8 +35,26 @@ namespace CombinatorialGameFrontend {
 
             Manager.MoveComplete += (player, _) => HandleMove(player);
             Manager.GameComplete += UpdateBoard;
+            
+            PlayGame();
+        }
 
-            GameTask = Manager.PlayGame();
+        private async void PlayGame() {
+            VictoryText.Text = null;
+            
+            _gameTask = Manager.PlayGame();
+            var victoryState = await _gameTask;
+
+            if (!victoryState.GameEnded)
+                return;
+            
+            if (victoryState.Winner == 1)
+                VictoryText.Text = "Player 1 has won";
+            else if(victoryState.Winner == -1)
+                VictoryText.Text = "Player 2 has won";
+            else {
+                VictoryText.Text = "The game ended in a tie";
+            }
         }
 
         private void InitializeBoard(int n) {
@@ -148,10 +166,10 @@ namespace CombinatorialGameFrontend {
         private async void RestartButton_OnClick(object sender, RoutedEventArgs e) {
             if (Manager.GameInProgress) {
                 Manager.CancelGame();
-                await GameTask;
+                await _gameTask;
             }
             Manager.RestartGame();
-            GameTask = Manager.PlayGame();
+            PlayGame();
             UpdateBoard();
         }
     }
