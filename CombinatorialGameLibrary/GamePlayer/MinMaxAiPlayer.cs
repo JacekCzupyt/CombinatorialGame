@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using CombinatorialGameLibrary.GameController;
 using CombinatorialGameLibrary.GameManagement;
 
 namespace CombinatorialGameLibrary.GamePlayer {
     public class MinMaxAiPlayer : IGamePlayer {
-        public Task<int> RequestMove(MoveRequest request) {
+        public Task<int> RequestMove(MoveRequest request, CancellationToken token) {
             var controller = new SimpleGameController(request.GameState);
-            return Task.Run(() => MinMax(controller).Item1);
+            return Task.Run(() => MinMax(controller).Item1, token);
         }
 
         //TODO: translations

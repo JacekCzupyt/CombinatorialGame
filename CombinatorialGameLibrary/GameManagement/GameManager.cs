@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using CombinatorialGameLibrary.GameController;
 using CombinatorialGameLibrary.GamePlayer;
@@ -33,29 +35,47 @@ namespace CombinatorialGameLibrary.GameManagement {
             if (GameStarted)
                 throw new InvalidOperationException("Game already ongoing");
             GameStarted = true;
-            
-            VictoryState result;
+
+            VictoryState result = VictoryState.None;
 
             while (true) {
-                int move;
-                (move, result) = await RequestMove();
+
+                int? move = null;
+
+                while (!move.HasValue) {
+                    _moveTokenSource = new CancellationTokenSource();
+                    var moveToken = _moveTokenSource.Token;
+                    
+                    try {
+                        (move, result) = await RequestMove(moveToken);
+                    }
+                    catch (TaskCanceledException e) {
+                        Debug.WriteLine("Move has been canceled");
+                        //TODO: Check if game has been canceled
+
+                        PauseGame();
+                        await gamePause.Task;
+                    }
+                    finally {
+                        _moveTokenSource.Dispose();
+                    } 
+                }
 
                 if (result.GameEnded) {
-                    MoveComplete?.Invoke(-_gameController.ActivePlayer, move);
+                    MoveComplete?.Invoke(-_gameController.ActivePlayer, move.Value);
                     break;
                 }
 
                 if (PauseGameAfterMove) {
-                    GamePaused = true;
-                    gamePause = new TaskCompletionSource();
+                    PauseGame();
                 }
-                
-                MoveComplete?.Invoke(-_gameController.ActivePlayer, move);
-                
-                if (PauseGameAfterMove)
+
+                MoveComplete?.Invoke(-_gameController.ActivePlayer, move.Value);
+
+                if (GamePaused)
                     await gamePause.Task;
             }
-            
+
             GameComplete?.Invoke(result);
             return result;
         }
@@ -72,12 +92,24 @@ namespace CombinatorialGameLibrary.GameManagement {
             gamePause.SetResult();
         }
 
-        private async Task<(int, VictoryState)> RequestMove() {
+        private void PauseGame() {
+            GamePaused = true;
+            gamePause = new TaskCompletionSource();
+        }
+
+        private CancellationTokenSource _moveTokenSource = null;
+
+        private async Task<(int, VictoryState)> RequestMove(CancellationToken token) {
+
             Exception err = null;
-            while(true) {
+            while (true) {
                 try {
-                    var request = new MoveRequest(GameState, GameState.ActivePlayer, err);
-                    int move = await _players[_gameController.ActivePlayer].RequestMove(request);
+                    var requestData = new MoveRequest(GameState, GameState.ActivePlayer, err);
+                    var moveRequest = _players[_gameController.ActivePlayer].RequestMove(requestData, token);
+                    int move = await moveRequest;
+                    
+                    token.ThrowIfCancellationRequested();
+                    
                     return (move, _gameController.MakeMove(move));
                 }
                 catch (ArgumentException e) {
