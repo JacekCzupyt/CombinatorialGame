@@ -5,5 +5,7 @@ namespace CombinatorialGameLibrary.GameController {
         VictoryState MakeMove(int m);
         
         void UndoMove();
+
+        void Restart();
     }
 }
