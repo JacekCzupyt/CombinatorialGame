@@ -27,14 +27,35 @@ namespace CombinatorialGameLibrary.GameManagement {
             PauseGameAfterMove = pauseGameAfterMove;
         }
 
-        public bool GameStarted { get; private set; } = false;
+        public bool GameInProgress { get; private set; }
 
         private TaskCompletionSource gamePause;
+        private CancellationTokenSource gameTokenSource;
 
         public async Task<VictoryState> PlayGame() {
-            if (GameStarted)
+            if (GameInProgress)
                 throw new InvalidOperationException("Game already ongoing");
-            GameStarted = true;
+            GameInProgress = true;
+            
+            gameTokenSource = new CancellationTokenSource();
+            var gameToken = gameTokenSource.Token;
+
+            try {
+                return await _playGame(gameToken);
+            }
+            catch (OperationCanceledException e) {
+                Debug.WriteLine("Game has been canceled");
+                GameInProgress = false;
+                GamePaused = false;
+                return VictoryState.None;
+            }
+            finally {
+                gameTokenSource.Dispose();
+            }
+        }
+
+        private async Task<VictoryState> _playGame(CancellationToken token) {
+            token.ThrowIfCancellationRequested();
 
             VictoryState result = VictoryState.None;
 
@@ -43,16 +64,17 @@ namespace CombinatorialGameLibrary.GameManagement {
                 int? move = null;
 
                 while (!move.HasValue) {
-                    _moveTokenSource = new CancellationTokenSource();
+                    _moveTokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
                     var moveToken = _moveTokenSource.Token;
                     
                     try {
                         (move, result) = await RequestMove(moveToken);
                     }
-                    catch (TaskCanceledException e) {
+                    catch (OperationCanceledException e) {
                         Debug.WriteLine("Move has been canceled");
-                        //TODO: Check if game has been canceled
-
+                        
+                        token.ThrowIfCancellationRequested();
+                        
                         PauseGame();
                         await gamePause.Task;
                     }
@@ -76,6 +98,7 @@ namespace CombinatorialGameLibrary.GameManagement {
                     await gamePause.Task;
             }
 
+            GameInProgress = false;
             GameComplete?.Invoke(result);
             return result;
         }
@@ -83,7 +106,7 @@ namespace CombinatorialGameLibrary.GameManagement {
         public void ResumeGame() {
             if (!PauseGameAfterMove)
                 throw new InvalidOperationException("This game does not pause in between moves");
-            if (!GameStarted)
+            if (!GameInProgress)
                 throw new InvalidOperationException("This game has not started yet");
             if (!GamePaused)
                 throw new InvalidOperationException("The game isn't paused");
@@ -92,12 +115,26 @@ namespace CombinatorialGameLibrary.GameManagement {
             gamePause.SetResult();
         }
 
+        public void RestartGame() {
+            if (GameInProgress) {
+                throw new InvalidOperationException("Can not restart game while it's in progress, cancel the game first");
+            }
+            _gameController.Restart();
+        }
+
+        public void CancelGame() {
+            if (!GameInProgress)
+                throw new InvalidOperationException("Can not cancel game which is not in progress");
+            gamePause.TrySetCanceled();
+            gameTokenSource.Cancel();
+        }
+
         private void PauseGame() {
             GamePaused = true;
             gamePause = new TaskCompletionSource();
         }
 
-        private CancellationTokenSource _moveTokenSource = null;
+        private CancellationTokenSource _moveTokenSource;
 
         private async Task<(int, VictoryState)> RequestMove(CancellationToken token) {
 

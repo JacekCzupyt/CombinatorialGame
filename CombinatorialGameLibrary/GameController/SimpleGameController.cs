@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using CombinatorialGameLibrary.GameState;
 
@@ -8,6 +9,16 @@ namespace CombinatorialGameLibrary.GameController {
         public SimpleGameController(int n, int k) : base(n, k) { }
 
         public SimpleGameController(IGameState state) : base(state) { }
+
+        public void Restart() {
+            ActivePlayer = 1;
+
+            for (int i = 0; i < N; i++)
+                _gameList[i] = 0;
+
+            EndGameState = VictoryState.None;
+            _history.Clear();
+        }
 
         public VictoryState MakeMove(int m) {
             if (EndGameState.GameEnded)

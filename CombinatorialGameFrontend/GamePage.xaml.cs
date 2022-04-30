@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,6 +25,8 @@ namespace CombinatorialGameFrontend {
 
         private readonly List<Button> GameTiles = new();
         private GameConfigPage.GamePauseBehaviour[] PauseBehaviour { get; }
+
+        private Task<VictoryState> GameTask = null;
         public GamePage((GameManager, GameConfigPage.GamePauseBehaviour[]) gameSettings) {
             Manager = gameSettings.Item1;
             PauseBehaviour = gameSettings.Item2;
@@ -33,7 +36,7 @@ namespace CombinatorialGameFrontend {
             Manager.MoveComplete += (player, _) => HandleMove(player);
             Manager.GameComplete += UpdateBoard;
 
-            Manager.PlayGame();
+            GameTask = Manager.PlayGame();
         }
 
         private void InitializeBoard(int n) {
@@ -137,11 +140,19 @@ namespace CombinatorialGameFrontend {
             brush.RelativeTransform = new ScaleTransform(0.1, 0.1);
             return brush;
         }
-
-        private TaskCompletionSource ResumeGame;
+        
         private void NextButton_OnClick(object sender, RoutedEventArgs e) {
             if(Manager.GamePaused)
                 Manager.ResumeGame();
+        }
+        private async void RestartButton_OnClick(object sender, RoutedEventArgs e) {
+            if (Manager.GameInProgress) {
+                Manager.CancelGame();
+                await GameTask;
+            }
+            Manager.RestartGame();
+            GameTask = Manager.PlayGame();
+            UpdateBoard();
         }
     }
 }

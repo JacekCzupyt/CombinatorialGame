@@ -25,6 +25,9 @@
         </Grid.RowDefinitions>
         
         <StackPanel x:Name="GameBoard" Orientation="Horizontal" VerticalAlignment="Top"/>
-        <Button Name="ResumeButton" IsEnabled="False" Grid.Row="1" Width="80" Height="30" HorizontalAlignment="Left" Click="NextButton_OnClick">Next</Button>
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <Button Name="ResumeButton" IsEnabled="False" Width="80" Height="30" HorizontalAlignment="Left" Padding="5px" Click="NextButton_OnClick">Next</Button>
+            <Button Name="RestartButton" Width="80" Height="30" HorizontalAlignment="Left" Padding="5px" Click="RestartButton_OnClick">Restart</Button>
+        </StackPanel>
     </Grid>
 </Page>
