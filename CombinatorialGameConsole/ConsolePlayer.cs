@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using CombinatorialGameLibrary.GameManagement;
 using CombinatorialGameLibrary.GamePlayer;
@@ -10,7 +11,7 @@ namespace CombinatorialGameConsole {
         public ConsolePlayer(string playerName) {
             PlayerName = playerName;
         }
-        public Task<int> RequestMove(MoveRequest request) {
+        public Task<int> RequestMove(MoveRequest request, CancellationToken token) {
             return Task.Run(() => GetPlayerInput(request));
         }
 

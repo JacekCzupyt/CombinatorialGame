@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using CombinatorialGameLibrary.GameManagement;
 using CombinatorialGameLibrary.GamePlayer;
@@ -9,11 +10,12 @@ namespace CombinatorialGameFrontend {
         
         public static UserGamePlayer Instance { get; } = new UserGamePlayer();
 
-        public Task<int> RequestMove(MoveRequest request) {
+        public Task<int> RequestMove(MoveRequest request, CancellationToken token) {
             Request = request;
             moveResult = new TaskCompletionSource<int>();
-            NotifyMove?.Invoke();
+            NotifyMove?.Invoke(request);
             moveRequested = true;
+            token.Register(OnMoveCanceled);
             return moveResult.Task;
         }
 
@@ -21,7 +23,7 @@ namespace CombinatorialGameFrontend {
         private TaskCompletionSource<int> moveResult;
         private bool moveRequested;
 
-        public event Action NotifyMove;
+        public event Action<MoveRequest> NotifyMove;
 
         public void MakeMove(int move) {
             if (moveRequested) {
@@ -30,6 +32,11 @@ namespace CombinatorialGameFrontend {
             }
             else
                 throw new InvalidOperationException("No move has been requested");
+        }
+
+        private void OnMoveCanceled() {
+            moveRequested = false;
+            moveResult.TrySetCanceled();
         }
     }
 }

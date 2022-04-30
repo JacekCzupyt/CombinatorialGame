@@ -15,22 +15,30 @@ namespace CombinatorialGameFrontend {
     /// Interaction logic for GameConfigPage.xaml
     /// </summary>
     public partial class GameConfigPage : Page {
-        private Action<GameManager> StartGame { get; }
+        private Action<(GameManager, GamePauseBehaviour[])> StartGame { get; }
 
         private const int MaxN = 10;
         private const int MaxK = 5;
 
+        public enum GamePauseBehaviour {
+            Pause,
+            Resume
+        }
+
         private class PlayerInitializer {
             public string Name { get; set; }
             public Func<IGamePlayer> PlayerFactory { get; set; }
+            public GamePauseBehaviour GamePauseBehaviour { get; set; }
         }
 
         private readonly List<PlayerInitializer> AvailablePlayers = new() {
-            new PlayerInitializer {Name = "Player", PlayerFactory = (() => UserGamePlayer.Instance)},
-            new PlayerInitializer {Name = "MinMax", PlayerFactory = (() => new MinMaxAiPlayer())}
+            new PlayerInitializer
+                { Name = "Player", PlayerFactory = (() => UserGamePlayer.Instance), GamePauseBehaviour = GamePauseBehaviour.Resume },
+            new PlayerInitializer
+                { Name = "MinMax", PlayerFactory = (() => new MinMaxAiPlayer()), GamePauseBehaviour = GamePauseBehaviour.Pause }
         };
 
-        public GameConfigPage(Action<GameManager> startGame) {
+        public GameConfigPage(Action<(GameManager, GamePauseBehaviour[])> startGame) {
             StartGame = startGame;
             InitializeComponent();
             InitializePlayerSelection();
@@ -40,7 +48,7 @@ namespace CombinatorialGameFrontend {
             Player1Box.ItemsSource = AvailablePlayers;
             Player1Box.DisplayMemberPath = "Name";
             Player1Box.SelectedIndex = 0;
-            
+
             Player2Box.ItemsSource = AvailablePlayers;
             Player2Box.DisplayMemberPath = "Name";
             Player2Box.SelectedIndex = 0;
@@ -51,26 +59,21 @@ namespace CombinatorialGameFrontend {
         private static bool IsTextAllowed(string text) {
             return !_regex.IsMatch(text);
         }
-        
+
         // Use the PreviewTextInputHandler to respond to key presses 
-        private void PreviewTextInputHandler(Object sender, TextCompositionEventArgs e) 
-        { 
-            e.Handled = !IsTextAllowed(e.Text); 
-        } 
-        
+        private void PreviewTextInputHandler(Object sender, TextCompositionEventArgs e) {
+            e.Handled = !IsTextAllowed(e.Text);
+        }
+
         // Use the DataObject.Pasting Handler 
-        private void TextBoxPasting(object sender, DataObjectPastingEventArgs e)
-        {
-            if (e.DataObject.GetDataPresent(typeof(String)))
-            {
+        private void TextBoxPasting(object sender, DataObjectPastingEventArgs e) {
+            if (e.DataObject.GetDataPresent(typeof(String))) {
                 String text = (String)e.DataObject.GetData(typeof(String));
-                if (!IsTextAllowed(text))
-                {
+                if (!IsTextAllowed(text)) {
                     e.CancelCommand();
                 }
             }
-            else
-            {
+            else {
                 e.CancelCommand();
             }
         }
@@ -84,7 +87,7 @@ namespace CombinatorialGameFrontend {
             }
         }
 
-        private GameManager ValidateInputs() {
+        private (GameManager, GamePauseBehaviour[]) ValidateInputs() {
             int n;
             try {
                 n = int.Parse(NTextbox.Text);
@@ -94,7 +97,7 @@ namespace CombinatorialGameFrontend {
             }
             if (n is <= 0 or > MaxN)
                 throw new ArgumentException($"N must be between 1 and {MaxN}");
-            
+
             int k;
             try {
                 k = int.Parse(KTextbox.Text);
@@ -105,11 +108,15 @@ namespace CombinatorialGameFrontend {
             if (k is <= 0 or > MaxK)
                 throw new ArgumentException($"K must be between 1 and {MaxK}");
 
-            return new GameManager(
-                (Player1Box.SelectedItem as PlayerInitializer)?.PlayerFactory(),
-                (Player2Box.SelectedItem as PlayerInitializer)?.PlayerFactory(),
-                new SimpleGameController(n, k)
-            );
+            var player1 = Player1Box.SelectedItem as PlayerInitializer;
+            var player2 = Player2Box.SelectedItem as PlayerInitializer;
+            
+            return (new GameManager(
+                player1!.PlayerFactory(),
+                player2!.PlayerFactory(),
+                new SimpleGameController(n, k),
+                true
+            ), new[]{player1!.GamePauseBehaviour, player2!.GamePauseBehaviour});
         }
     }
 }
