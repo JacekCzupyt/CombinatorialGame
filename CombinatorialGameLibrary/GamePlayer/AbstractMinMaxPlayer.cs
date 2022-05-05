@@ -20,22 +20,26 @@ namespace CombinatorialGameLibrary.GamePlayer {
             return Task.Run(() => MinMax(controller, _depth).Item1, token);
         }
 
-        private (int, float) MinMax(IGameController controller, int depth) {
+        private (int, float) MinMax(IGameController controller, int depth, float alphaBetaThreshold = float.PositiveInfinity) {
             int currentPlayer = controller.ActivePlayer;
 
-            float bestResVal = float.MinValue;
+            float bestResVal = float.NegativeInfinity;
             int bestResInd = -1;
 
             for (int i = 0; i < controller.N; i++) {
                 if (controller.GameList[i] != 0)
                     continue;
 
-                float moveRes = TestMove(controller, i, depth-1);
+                float moveRes = TestMove(controller, i, depth - 1, bestResVal);
                 float moveScore = moveRes * currentPlayer;
 
                 if (moveScore > bestResVal) {
                     bestResVal = moveScore;
                     bestResInd = i;
+                }
+
+                if (bestResVal > alphaBetaThreshold) {
+                    return (bestResInd, bestResVal);
                 }
             }
 
@@ -45,15 +49,15 @@ namespace CombinatorialGameLibrary.GamePlayer {
             return (bestResInd, bestResVal);
         }
 
-        private float TestMove(IGameController controller, int move, int depth) {
+        private float TestMove(IGameController controller, int move, int depth, float bestVal) {
             var victoryState = controller.MakeMove(move);
             float res;
             if (victoryState.GameEnded) {
                 Debug.Assert(victoryState.Winner != null, "res.Winner != null");
                 res = victoryState.Winner.Value * 1000 * (controller.GameList.Count(x => x == 0) + 1);
             }
-            else if(depth>0) {
-                res = MinMax(controller, depth).Item2 * controller.ActivePlayer;
+            else if (depth > 0) {
+                res = MinMax(controller, depth, -bestVal).Item2 * controller.ActivePlayer;
             }
             else {
                 res = EvaluateMove(controller);
@@ -61,8 +65,8 @@ namespace CombinatorialGameLibrary.GamePlayer {
             controller.UndoMove();
             return res;
         }
-        
-        
+
+
         /// <summary>
         /// Evaluates the current game state in a relatively computationally simple way.
         /// </summary>
