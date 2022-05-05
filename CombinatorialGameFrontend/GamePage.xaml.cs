@@ -47,6 +47,9 @@ namespace CombinatorialGameFrontend {
             _gameTask = Manager.PlayGame();
             var victoryState = await _gameTask;
 
+            RestartButton.Visibility = Visibility.Visible;
+            NewGameButton.Visibility = Visibility.Visible;
+
             if (!victoryState.GameEnded)
                 return;
             
@@ -173,6 +176,9 @@ namespace CombinatorialGameFrontend {
             Manager.RestartGame();
             PlayGame();
             UpdateBoard();
+
+            RestartButton.Visibility = Visibility.Collapsed;
+            NewGameButton.Visibility = Visibility.Collapsed;
         }
 
         private async void NewGameButton_OnClick(object sender, RoutedEventArgs e) {

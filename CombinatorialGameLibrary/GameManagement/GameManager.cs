@@ -125,7 +125,7 @@ namespace CombinatorialGameLibrary.GameManagement {
         public void CancelGame() {
             if (!GameInProgress)
                 throw new InvalidOperationException("Can not cancel game which is not in progress");
-            gamePause.TrySetCanceled();
+            gamePause?.TrySetCanceled();
             gameTokenSource.Cancel();
         }
 

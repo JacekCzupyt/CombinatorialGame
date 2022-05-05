@@ -17,24 +17,31 @@
             <Setter Property="BorderBrush" Value="Black"/>
         </Style>
     </Page.Resources>
-
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+    
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Click="NewGameButton_OnClick" Header="New game" Padding="5"/>
+            <MenuItem Click="RestartButton_OnClick" Header="Restart" Padding="5"/>
+        </Menu>
         
-        <StackPanel x:Name="GameBoard" Orientation="Horizontal" VerticalAlignment="Top"/>
-        <StackPanel Grid.Row="1" Orientation="Horizontal">
-            <Button Name="ResumeButton" IsEnabled="False" Width="80" Height="30" HorizontalAlignment="Left" Padding="5px" Click="NextButton_OnClick">Next</Button>
-            <Button Name="RestartButton" Width="80" Height="30" HorizontalAlignment="Left" Padding="5px" Click="RestartButton_OnClick">
-                Restart
-            </Button>
-            <Button Name="NewGameButton" Width="80" Height="30" HorizontalAlignment="Left" Padding="5px" Click="NewGameButton_OnClick">
-                New game
-            </Button>
-        </StackPanel>
-        <TextBlock Name="VictoryText" Grid.Row="2" HorizontalAlignment="Left" FontSize="20"></TextBlock>
-    </Grid>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+        
+            <WrapPanel x:Name="GameBoard" Orientation="Horizontal" VerticalAlignment="Top"/>
+            <StackPanel Grid.Row="1" Orientation="Horizontal">
+                <Button Name="ResumeButton" IsEnabled="False" Width="80" Height="30" HorizontalAlignment="Left" Padding="5px" Click="NextButton_OnClick">Next</Button>
+                <Button Name="RestartButton" Width="80" Height="30" HorizontalAlignment="Left" Padding="5px" Click="RestartButton_OnClick" Visibility="Collapsed">
+                    Restart
+                </Button>
+                <Button Name="NewGameButton" Width="80" Height="30" HorizontalAlignment="Left" Padding="5px" Click="NewGameButton_OnClick" Visibility="Collapsed">
+                    New game
+                </Button>
+            </StackPanel>
+            <TextBlock Name="VictoryText" Grid.Row="2" HorizontalAlignment="Left" FontSize="20"></TextBlock>
+        </Grid>
+    </DockPanel>
 </Page>
