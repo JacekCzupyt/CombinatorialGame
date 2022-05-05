@@ -21,13 +21,15 @@ namespace CombinatorialGameFrontend {
     /// Interaction logic for GamePage.xaml
     /// </summary>
     public partial class GamePage : Page {
+        private readonly Action _returnToConfig;
         private GameManager Manager { get; }
 
         private readonly List<Button> GameTiles = new();
         private GameConfigPage.GamePauseBehaviour[] PauseBehaviour { get; }
 
         private Task<VictoryState> _gameTask;
-        public GamePage((GameManager, GameConfigPage.GamePauseBehaviour[]) gameSettings) {
+        public GamePage((GameManager, GameConfigPage.GamePauseBehaviour[]) gameSettings, Action returnToConfig) {
+            _returnToConfig = returnToConfig;
             Manager = gameSettings.Item1;
             PauseBehaviour = gameSettings.Item2;
             InitializeComponent();
@@ -45,6 +47,9 @@ namespace CombinatorialGameFrontend {
             _gameTask = Manager.PlayGame();
             // CLR/System.ArgumentOutOfRangeException when debbuging
             var victoryState = await _gameTask;
+
+            RestartButton.Visibility = Visibility.Visible;
+            NewGameButton.Visibility = Visibility.Visible;
 
             if (!victoryState.GameEnded)
                 return;
@@ -172,6 +177,17 @@ namespace CombinatorialGameFrontend {
             Manager.RestartGame();
             PlayGame();
             UpdateBoard();
+
+            RestartButton.Visibility = Visibility.Collapsed;
+            NewGameButton.Visibility = Visibility.Collapsed;
+        }
+
+        private async void NewGameButton_OnClick(object sender, RoutedEventArgs e) {
+            if (Manager.GameInProgress) {
+                Manager.CancelGame();
+                await _gameTask;
+            }
+            _returnToConfig.Invoke();
         }
     }
 }
