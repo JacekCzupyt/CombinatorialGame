@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CombinatorialGameLibrary.GameController;
@@ -17,7 +18,7 @@ namespace CombinatorialGameLibrary.GamePlayer {
         public static (int, int) MinMax(IGameController controller) {
             int currentPlayer = controller.ActivePlayer;
 
-            int bestResVal = -2, bestResInd = -1;
+            int bestResVal = Int32.MinValue, bestResInd = -1;
             
             for (int i = 0; i < controller.N; i++) {
                 if(controller.GameList[i] != 0)
@@ -46,7 +47,7 @@ namespace CombinatorialGameLibrary.GamePlayer {
             int res;
             if (victoryState.GameEnded) {
                 Debug.Assert(victoryState.Winner != null, "res.Winner != null");
-                res = victoryState.Winner.Value;
+                res = victoryState.Winner.Value * (controller.GameList.Count(x => x == 0) + 1);
             }
             else {
                 res = MinMax(controller).Item2 * controller.ActivePlayer;
