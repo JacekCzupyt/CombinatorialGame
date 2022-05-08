@@ -30,7 +30,7 @@ namespace CombinatorialGameLibrary.GameController {
 
 
             _gameList[m] = ActivePlayer;
-            _history.Add(m);
+            _history?.Add(m);
             ActivePlayer = -ActivePlayer;
             
             EndGameState = CheckVictory(m);
@@ -70,6 +70,8 @@ namespace CombinatorialGameLibrary.GameController {
         }
         
         public void UndoMove() {
+            if (History is null)
+                throw new InvalidOperationException("The history of this match is not available");
             if (History.Count == 0)
                 throw new InvalidOperationException("No moves have been made yet");
 

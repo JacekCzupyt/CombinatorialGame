@@ -74,7 +74,6 @@ namespace CombinatorialGameLibrary.GamePlayer {
         /// <returns>
         /// Evaluation of the game state. The bigger the value, the more game state is in Player 1's favour.
         /// Positive values mean Player 1 is winning, negative mean that Player 2 is winning.
-        /// The values should preferably be normalized between -1 and 1
         /// </returns>
         protected abstract float EvaluateMove(IGameState state);
     }
