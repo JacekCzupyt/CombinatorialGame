@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace CombinatorialGameLibrary.GameState {
@@ -27,7 +28,11 @@ namespace CombinatorialGameLibrary.GameState {
             _history = new List<int>();
         }
         
-        public SimpleGameState(int n, int k, IEnumerable<int> gameList, int activePlayer) {
+        /// <summary>
+        /// This method should only be used for testing purposes.
+        /// </summary>
+        public SimpleGameState(int n, int k, IEnumerable<int> gameList, int activePlayer, List<int> history = null) {
+
             var enumerable = gameList as int[] ?? gameList.ToArray();
             if (n != enumerable.Count())
                 throw new ArgumentException("gameList length does not match n");
@@ -38,7 +43,7 @@ namespace CombinatorialGameLibrary.GameState {
 
             _gameList = enumerable.ToList();
             EndGameState = VictoryState.None;
-            _history = null;
+            _history = history ?? new List<int>();
         }
 
         public virtual object Clone() {
