@@ -35,7 +35,9 @@ namespace CombinatorialGameFrontend {
             new PlayerInitializer
                 { Name = "Player", PlayerFactory = (() => UserGamePlayer.Instance), GamePauseBehaviour = GamePauseBehaviour.Resume },
             new PlayerInitializer
-                { Name = "MinMax", PlayerFactory = (() => new MinMaxAiPlayer()), GamePauseBehaviour = GamePauseBehaviour.Pause }
+                { Name = "MinMax", PlayerFactory = (() => new MinMaxAiPlayer()), GamePauseBehaviour = GamePauseBehaviour.Pause },
+            new PlayerInitializer
+                { Name = "MonteCarlo", PlayerFactory = (() => new MonteCarloAiPlayer()), GamePauseBehaviour = GamePauseBehaviour.Pause }
         };
 
         public GameConfigPage(Action<(GameManager, GamePauseBehaviour[])> startGame) {

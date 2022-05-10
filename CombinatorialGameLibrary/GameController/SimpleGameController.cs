@@ -68,7 +68,18 @@ namespace CombinatorialGameLibrary.GameController {
                 VictoryState.Tie :
                 VictoryState.None;
         }
-        
+
+        public List<int> getAvailableIdxs()
+        {
+            return Enumerable.Range(0, GameList.Count()).Where(i => GameList[i] == 0).ToList();
+        }
+
+        public VictoryState MakeRandomMove()
+        {
+            List<int> availableIdxs = getAvailableIdxs();
+            return MakeMove(availableIdxs[new Random().Next(availableIdxs.Count)]);
+        }
+
         public void UndoMove() {
             if (History is null)
                 throw new InvalidOperationException("The history of this match is not available");
