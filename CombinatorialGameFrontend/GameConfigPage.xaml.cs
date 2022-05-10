@@ -32,10 +32,21 @@ namespace CombinatorialGameFrontend {
         }
 
         private readonly List<PlayerInitializer> AvailablePlayers = new() {
-            new PlayerInitializer
-                { Name = "Player", PlayerFactory = (() => UserGamePlayer.Instance), GamePauseBehaviour = GamePauseBehaviour.Resume },
-            new PlayerInitializer
-                { Name = "MinMax", PlayerFactory = (() => new MinMaxAiPlayer()), GamePauseBehaviour = GamePauseBehaviour.Pause }
+            new PlayerInitializer() {
+                Name = "Player",
+                PlayerFactory = (() => UserGamePlayer.Instance),
+                GamePauseBehaviour = GamePauseBehaviour.Resume
+            },
+            new PlayerInitializer {
+                Name = "MinMax", 
+                PlayerFactory = (() => new MinMaxAiPlayer()), 
+                GamePauseBehaviour = GamePauseBehaviour.Pause
+            },
+            new PlayerInitializer {
+                Name = "AnalyticalMinMax",
+                PlayerFactory = (() => new AnalyticalGamePlayer(8)),
+                GamePauseBehaviour = GamePauseBehaviour.Pause
+            }
         };
 
         public GameConfigPage(Action<(GameManager, GamePauseBehaviour[])> startGame) {
@@ -110,13 +121,13 @@ namespace CombinatorialGameFrontend {
 
             var player1 = Player1Box.SelectedItem as PlayerInitializer;
             var player2 = Player2Box.SelectedItem as PlayerInitializer;
-            
+
             return (new GameManager(
                 player1!.PlayerFactory(),
                 player2!.PlayerFactory(),
                 new SimpleGameController(n, k),
                 true
-            ), new[]{player1!.GamePauseBehaviour, player2!.GamePauseBehaviour});
+            ), new[] { player1!.GamePauseBehaviour, player2!.GamePauseBehaviour });
         }
     }
 }
