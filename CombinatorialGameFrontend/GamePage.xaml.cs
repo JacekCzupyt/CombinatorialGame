@@ -45,6 +45,7 @@ namespace CombinatorialGameFrontend {
             VictoryText.Text = null;
             
             _gameTask = Manager.PlayGame();
+            // CLR/System.ArgumentOutOfRangeException when debbuging
             var victoryState = await _gameTask;
 
             RestartButton.Visibility = Visibility.Visible;
