@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -45,6 +45,11 @@ namespace CombinatorialGameFrontend {
             new PlayerInitializer {
                 Name = "AnalyticalMinMax",
                 PlayerFactory = (() => new AnalyticalGamePlayer(8)),
+                GamePauseBehaviour = GamePauseBehaviour.Pause
+            },
+            new PlayerInitializer {
+                Name = "MonteCarlo", 
+                PlayerFactory = (() => new MonteCarloAiPlayer()), 
                 GamePauseBehaviour = GamePauseBehaviour.Pause
             }
         };
