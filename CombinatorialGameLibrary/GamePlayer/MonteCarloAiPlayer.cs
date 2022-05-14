@@ -49,12 +49,12 @@ namespace CombinatorialGameLibrary.GamePlayer
 
             for (int i = 0; i < wins.Count; i++)
             {
-                if (wins[i] == wins.Max())
+                if (wins[i] == wins.Max() && availableIdxs.Contains(i))
                 {
                     return i;
                 }
             }
-            return wins[0];
+            return availableIdxs[0];
 
         }
     }
