@@ -51,6 +51,11 @@ namespace CombinatorialGameFrontend {
                 Name = "MonteCarlo", 
                 PlayerFactory = (() => new MonteCarloAiPlayer()), 
                 GamePauseBehaviour = GamePauseBehaviour.Pause
+            },
+            new PlayerInitializer {
+                Name = "MonteCarlo2", 
+                PlayerFactory = (() => new MonteCarloMinMaxPlayer()), 
+                GamePauseBehaviour = GamePauseBehaviour.Pause
             }
         };
 
