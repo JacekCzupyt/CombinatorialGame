@@ -30,64 +30,66 @@ namespace CombinatorialGameLibrary.GameEvaluation {
             // (number_of_ones, number_of_minusones) = CountOnesAndMinusOnes(state.GameList, state.K);
 
             for (int m = 1; m <= (state.N - 1) / (state.K - 1); m++) {
-                    for (int i = 0; i < m; i++) {
-                        int start = i;
-                        int end = i + m * (state.K - 1);
-                        if(end >= state.N) {
+                for (int i = 0; i < m; i++) {
+                    int start = i;
+                    int end = i + m * (state.K - 1);
+                    if (end >= state.N) {
+                        break;
+                    }
+                    (number_of_ones, number_of_minusones) = CountOnesAndMinusOnes(state.GameList, i, m, state.K);
+                    while (end < state.N) {
+                        if (number_of_ones != 0 || number_of_minusones != 0) {
+                            if (number_of_ones == 0) {
+                                if (number_of_minusones == state.K) {
+                                    return 1_000_000;
+                                }
+                                res += this.beta * Math.Pow(number_of_minusones, this.gamma);
+                            }
+                            if (number_of_minusones == 0) {
+                                if (number_of_ones == state.K) {
+                                    return -1_000_000;
+                                }
+                                res -= this.alpha * Math.Pow(number_of_ones, this.gamma);
+                            }
+                        }
+                        if (state.GameList[start] != 0) {
+                            if (state.GameList[start] == 1) {
+                                number_of_ones--;
+                            }
+                            if (state.GameList[start] == -1) {
+                                number_of_minusones--;
+                            }
+                        }
+                        start += m;
+                        end += m;
+                        if (end >= state.N) {
                             break;
                         }
-                        (number_of_ones, number_of_minusones) = CountOnesAndMinusOnes(state.GameList, i, m, state.K);
-                        while (end < state.N){
-                            if (number_of_ones!=0 || number_of_minusones!=0) {
-                                if(number_of_ones == 0) {
-                                    if(number_of_minusones == state.K){
-                                        return 1_000_000;
-                                    }
-                                    res += this.beta * Math.Pow(number_of_minusones, this.gamma);
-                                }
-                                if(number_of_minusones == 0) {
-                                    if(number_of_ones == state.K){
-                                        return -1_000_000;
-                                    }
-                                    res -= this.alpha * Math.Pow(number_of_ones, this.gamma);
-                                }
+                        if (state.GameList[end] != 0) {
+                            if (state.GameList[end] == 1) {
+                                number_of_ones++;
                             }
-                            if(state.GameList[start] != 0){
-                                if(state.GameList[start] == 1) {
-                                    number_of_ones--;
-                                }
-                                if(state.GameList[start] == -1) {
-                                    number_of_minusones--;
-                                }
-                            }
-                            start +=m;
-                            end +=m;
-                            if(end >= state.N) {
-                                break;
-                            }
-                            if(state.GameList[end] != 0){
-                                if(state.GameList[end] == 1) {
-                                    number_of_ones++;
-                                }
-                                if(state.GameList[end] == -1) {
-                                    number_of_minusones++;
-                                }
+                            if (state.GameList[end] == -1) {
+                                number_of_minusones++;
                             }
                         }
                     }
                 }
+            }
             return res;
         }
-        public (int, int) CountOnesAndMinusOnes(IReadOnlyList<int> gameList, int start, int step, int length ) {
+        public (int, int) CountOnesAndMinusOnes(IReadOnlyList<int> gameList, int start, int step, int length) {
             int number_of_ones = 0;
             int number_of_minusones = 0;
-            for (int i = start; i <= start + step*(length-1); i+=step) {
+            for (int i = start; i <= start + step * (length - 1); i += step) {
                 if (gameList[i] == 1)
                     number_of_ones++;
                 else if (gameList[i] == -1)
                     number_of_minusones++;
             }
-            Console.WriteLine($"Start: {start}, Step: {step}, End: {start + (length-1) * step}, 1: {number_of_ones}, -1: {number_of_minusones}");
+            // Debug.WriteLine(
+            //     $"Start: {start}, Step: {step}, End: {start + (length - 1) * step}, 1: {number_of_ones}, -1: {number_of_minusones}"
+            // );
             return (number_of_ones, number_of_minusones);
         }
         public int EvaluateSequence(IReadOnlyList<int> gameList, int start, int step, int length) {

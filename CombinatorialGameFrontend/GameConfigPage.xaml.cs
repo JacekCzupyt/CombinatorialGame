@@ -17,8 +17,8 @@ namespace CombinatorialGameFrontend {
     public partial class GameConfigPage : Page {
         private Action<(GameManager, GamePauseBehaviour[])> StartGame { get; }
 
-        private const int MaxN = 10;
-        private const int MaxK = 5;
+        private const int MaxN = 100;
+        private const int MaxK = 15;
 
         public enum GamePauseBehaviour {
             Pause,
@@ -44,7 +44,7 @@ namespace CombinatorialGameFrontend {
             },
             new PlayerInitializer {
                 Name = "AnalyticalMinMax",
-                PlayerFactory = (() => new AnalyticalGamePlayer(8)),
+                PlayerFactory = (() => new AnalyticalGamePlayer()),
                 GamePauseBehaviour = GamePauseBehaviour.Pause
             },
             new PlayerInitializer {

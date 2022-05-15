@@ -1,23 +1,65 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using CombinatorialGameLibrary.GameController;
 using CombinatorialGameLibrary.GameManagement;
 using CombinatorialGameLibrary.GameState;
 
 namespace CombinatorialGameLibrary.GamePlayer {
     public abstract class AbstractMinMaxPlayer : IGamePlayer {
-        private readonly int _depth;
+        private readonly int? _maxDepth;
+        private readonly float? _maxTime;
+        private int totalEvaluations = 0;
 
-        protected AbstractMinMaxPlayer(int depth) {
-            _depth = depth;
+        protected AbstractMinMaxPlayer(int? maxDepth = null, float? maxTime = 5) {
+            _maxDepth = maxDepth;
+            _maxTime = maxTime;
         }
         public Task<int> RequestMove(MoveRequest request, CancellationToken token) {
             var controller = new SimpleGameController(request.GameState);
-            return Task.Run(() => MinMax(controller, _depth).Item1, token);
+            return Task.Run(() => PrepareMinMax(controller), token);
+        }
+
+        private int PrepareMinMax(IGameController controller) {
+            int depth = Int32.MaxValue;
+
+            if (_maxTime.HasValue) {
+                var tmp = Stopwatch.StartNew();
+
+                EvaluateMove(controller);
+
+                tmp.Stop();
+                var watch = Stopwatch.StartNew();
+
+                EvaluateMove(controller);
+
+                watch.Stop();
+                var evalTime = watch.Elapsed.TotalSeconds;
+                Debug.WriteLine($"Evaluation time: {evalTime}");
+
+                var branchFactor = controller.GameList.Count(e => e == 0);
+                int i = 0, branches = 1;
+
+                while (branches * evalTime * (branchFactor-i) < _maxTime.Value * 10) {
+                    branches *= branchFactor - i;
+                    i++;
+                }
+                depth = Math.Max(i, 1);
+                
+                Debug.WriteLine($"Depth: {depth}, Branches: {branches}, Estimated time: {branches * evalTime}");
+            }
+
+            if (_maxDepth.HasValue)
+                depth = Math.Min(depth, _maxDepth.Value);
+
+            var watch2 = Stopwatch.StartNew();
+            var res = MinMax(controller, depth).Item1;
+            watch2.Stop();
+            Debug.WriteLine($"Actual total time: {watch2.Elapsed.TotalSeconds}, Total evaluations: {totalEvaluations}");
+            return res;
         }
 
         private (int, float) MinMax(IGameController controller, int depth, float alphaBetaThreshold = float.PositiveInfinity) {
@@ -61,6 +103,7 @@ namespace CombinatorialGameLibrary.GamePlayer {
             }
             else {
                 res = EvaluateMove(controller);
+                totalEvaluations++;
             }
             controller.UndoMove();
             return res;
