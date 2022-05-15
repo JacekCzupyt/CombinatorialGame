@@ -15,17 +15,47 @@ namespace CombinatorialGameLibrary.GamePlayer
             var controller = new SimpleGameController(request.GameState);
             return Task.Run(() => bestResInd(controller), token);
         }
-        public static int bestResInd(IGameController controller, int n_iter = 1000)
+        public static int bestResInd(IGameController controller)
         {
-            List<int> wins = new List<int>();
+            List<int> availableIdxs = controller.getAvailableIdxs();
+            List<int> wins = getProbabilityList(controller, availableIdxs);
+
+            List<int> hopefulIdxs = new List<int>();
+            for (int i = 0; i < wins.Count; i++)
+            {
+                if (wins[i] >= (wins.Max() * 0.8 - 1) && availableIdxs.Contains(i))
+                {
+                    hopefulIdxs.Add(i);
+                }
+            }
+            if(hopefulIdxs.Count() == 1)
+            {
+                return hopefulIdxs[0];
+            }
+            wins.Clear();
+            wins = getProbabilityList(controller, hopefulIdxs);
+            for(int i = 0; i < wins.Count; i++)
+            {
+                if (wins[i] == wins.Max() && hopefulIdxs.Contains(i))
+                {
+                    return i;
+                }
+            }
+            return hopefulIdxs[0];
+
+        }
+
+        protected static List<int> getProbabilityList(IGameController controller, List<int> availableIdxs)
+        {
+            List<int> probabilityList = new List<int>();
             for (int i = 0; i < controller.GameList.Count; i++)
             {
-                wins.Add(0);
+                probabilityList.Add(0);
             }
-            List<int> availableIdxs = controller.getAvailableIdxs();
             int testedMove;
             for (int j = 0; j < availableIdxs.Count; j++)
             {
+                int n_iter = (int) Math.Round(3000.0 / availableIdxs.Count);
                 testedMove = availableIdxs[j];
                 for (int i = 0; i < n_iter; i++)
                 {
@@ -38,7 +68,7 @@ namespace CombinatorialGameLibrary.GamePlayer
                         {
                             if (tempGame.EndGameState.Winner == activePlayer)
                             {
-                                wins[testedMove]++;
+                                probabilityList[testedMove]++;
                             }
                             break;
                         }
@@ -46,16 +76,8 @@ namespace CombinatorialGameLibrary.GamePlayer
                     }
                 }
             }
-
-            for (int i = 0; i < wins.Count; i++)
-            {
-                if (wins[i] == wins.Max() && availableIdxs.Contains(i))
-                {
-                    return i;
-                }
-            }
-            return availableIdxs[0];
-
+            return probabilityList;
         }
+
     }
 }
