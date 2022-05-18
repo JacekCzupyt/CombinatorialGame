@@ -17,9 +17,7 @@ namespace CombinatorialGameConsole {
         private static AbstractMinMaxPlayer player = new AnalyticalGamePlayer(null, maxTime: 5);
         static void Main(string[] args) {
             var gameState = new SimpleGameState(30, 8);
-            var evaluator = new MonteCarloEvaluationFunction(count: null, time: 1, new Random(0));
             // await player.RequestMove(new MoveRequest(gameState, 1), CancellationToken.None);
-            Console.WriteLine($"Evaluation of gamestate: {evaluator.EvaluatePosition(gameState)}");
         }
     }
 }

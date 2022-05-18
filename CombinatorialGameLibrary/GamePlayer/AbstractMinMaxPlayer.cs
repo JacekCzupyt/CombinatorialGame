@@ -43,7 +43,7 @@ namespace CombinatorialGameLibrary.GamePlayer {
                 var branchFactor = controller.GameList.Count(e => e == 0);
                 int i = 0, branches = 1;
 
-                while (branches * evalTime * (branchFactor-i) < _maxTime.Value * 10) {
+                while (branches * evalTime * (branchFactor-i) < _maxTime.Value * 10 && i < branchFactor) {
                     branches *= branchFactor - i;
                     i++;
                 }
