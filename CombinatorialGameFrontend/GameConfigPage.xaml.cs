@@ -128,9 +128,17 @@ namespace CombinatorialGameFrontend {
             }
             if (k is <= 0 or > MaxK)
                 throw new ArgumentException($"K must be between 1 and {MaxK}");
+            if (k > n)
+                throw new ArgumentException("k must not be greater then n");
 
             var player1 = Player1Box.SelectedItem as PlayerInitializer;
             var player2 = Player2Box.SelectedItem as PlayerInitializer;
+
+            if ((player1!.Name == "Simple MinMax" || player2!.Name == "Simple MinMax") && n > 11)
+                throw new ArgumentException(
+                    "Simple MinMax is the simplest AI, which literally solves the provided game. " +
+                    "Using it on N greater then 11 would result in extremely long loading times."
+                );
 
             return (new GameManager(
                 player1!.PlayerFactory(),
