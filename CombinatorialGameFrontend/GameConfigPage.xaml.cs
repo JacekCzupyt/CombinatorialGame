@@ -18,7 +18,7 @@ namespace CombinatorialGameFrontend {
         private Action<(GameManager, GamePauseBehaviour[])> StartGame { get; }
 
         private const int MaxN = 100;
-        private const int MaxK = 15;
+        private const int MaxK = 100;
 
         public enum GamePauseBehaviour {
             Pause,
@@ -33,27 +33,27 @@ namespace CombinatorialGameFrontend {
 
         private readonly List<PlayerInitializer> AvailablePlayers = new() {
             new PlayerInitializer() {
-                Name = "Player",
+                Name = "Human Player",
                 PlayerFactory = (() => UserGamePlayer.Instance),
                 GamePauseBehaviour = GamePauseBehaviour.Resume
             },
             new PlayerInitializer {
-                Name = "MinMax", 
+                Name = "Simple MinMax", 
                 PlayerFactory = (() => new MinMaxAiPlayer()), 
                 GamePauseBehaviour = GamePauseBehaviour.Pause
             },
             new PlayerInitializer {
-                Name = "AnalyticalMinMax",
+                Name = "Analytical MinMax",
                 PlayerFactory = (() => new AnalyticalGamePlayer()),
                 GamePauseBehaviour = GamePauseBehaviour.Pause
             },
             new PlayerInitializer {
-                Name = "MonteCarlo", 
+                Name = "MonteCarlo V1", 
                 PlayerFactory = (() => new MonteCarloAiPlayer()), 
                 GamePauseBehaviour = GamePauseBehaviour.Pause
             },
             new PlayerInitializer {
-                Name = "MonteCarlo2", 
+                Name = "MonteCarlo V2", 
                 PlayerFactory = (() => new MonteCarloMinMaxPlayer()), 
                 GamePauseBehaviour = GamePauseBehaviour.Pause
             }

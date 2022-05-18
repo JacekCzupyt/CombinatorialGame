@@ -8,14 +8,16 @@ namespace CombinatorialGameLibrary.GameEvaluation {
     public class MonteCarloEvaluationFunction {
         private readonly int? _count;
         private readonly float? _time;
+        private readonly float? _dynamicTime;
         private readonly Random _rng;
 
-        public MonteCarloEvaluationFunction(int? count = 1000, float? time = null, Random rng = null) {
+        public MonteCarloEvaluationFunction(int? count = 1000, float? time = null, float? dynamicTime = null, Random rng = null) {
             if (!count.HasValue && !time.HasValue)
                 throw new ArgumentException("Time and count can't both be null");
 
             _count = count;
             _time = time;
+            _dynamicTime = dynamicTime;
             _rng = rng ?? new Random();
         }
 
@@ -42,13 +44,15 @@ namespace CombinatorialGameLibrary.GameEvaluation {
             n = state.N;
             l = state.History.Count;
             k = state.K;
-            
-            
+
+
             var watch = Stopwatch.StartNew();
             int i = 0;
             int sum = 0;
-            
-            while (!(watch.Elapsed.TotalSeconds >= _time || i >= _count)) {
+
+            while (!(watch.Elapsed.TotalSeconds >= _time ||
+                       i >= _count ||
+                       watch.Elapsed.TotalSeconds > _dynamicTime / _availableTiles.Count)) {
                 var res = PreformMonteCarloRun();
                 sum += res;
                 i++;
@@ -56,7 +60,7 @@ namespace CombinatorialGameLibrary.GameEvaluation {
 
             watch.Stop();
             Debug.WriteLine($"Time: {watch.Elapsed.TotalSeconds}, Iterations: {i}");
-            
+
             return (float)sum / i;
         }
 
@@ -105,7 +109,7 @@ namespace CombinatorialGameLibrary.GameEvaluation {
 
                     if (!seq || latestMove >= earliestSequence)
                         continue;
-                    
+
                     earliestSequence = latestMove;
                     currentWinner = -player;
                 }
