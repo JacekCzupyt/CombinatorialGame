@@ -141,6 +141,7 @@ namespace CombinatorialGameLibrary.GameManagement {
             Exception err = null;
             while (true) {
                 try {
+                    token.ThrowIfCancellationRequested();
                     var requestData = new MoveRequest(GameState, GameState.ActivePlayer, err);
                     var moveRequest = _players[_gameController.ActivePlayer].RequestMove(requestData, token);
                     int move = await moveRequest;

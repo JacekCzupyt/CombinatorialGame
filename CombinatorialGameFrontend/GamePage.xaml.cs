@@ -186,6 +186,7 @@ namespace CombinatorialGameFrontend {
                 Manager.CancelGame();
                 await _gameTask;
             }
+            UserGamePlayer.ResetInstance();
             _returnToConfig.Invoke();
         }
     }

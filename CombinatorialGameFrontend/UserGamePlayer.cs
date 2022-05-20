@@ -8,7 +8,12 @@ namespace CombinatorialGameFrontend {
     public class UserGamePlayer : IGamePlayer {
         private UserGamePlayer() {}
         
-        public static UserGamePlayer Instance { get; } = new UserGamePlayer();
+        public static UserGamePlayer Instance { get; private set; } = new UserGamePlayer();
+
+        public static UserGamePlayer ResetInstance() {
+            Instance = new UserGamePlayer();
+            return Instance;
+        }
 
         public Task<int> RequestMove(MoveRequest request, CancellationToken token) {
             Request = request;
