@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -38,8 +39,8 @@ namespace CombinatorialGameFrontend {
                 GamePauseBehaviour = GamePauseBehaviour.Resume
             },
             new PlayerInitializer {
-                Name = "Simple MinMax", 
-                PlayerFactory = (() => new MinMaxAiPlayer()), 
+                Name = "Simple MinMax",
+                PlayerFactory = (() => new MinMaxAiPlayer()),
                 GamePauseBehaviour = GamePauseBehaviour.Pause
             },
             new PlayerInitializer {
@@ -48,13 +49,13 @@ namespace CombinatorialGameFrontend {
                 GamePauseBehaviour = GamePauseBehaviour.Pause
             },
             new PlayerInitializer {
-                Name = "MonteCarlo V1", 
-                PlayerFactory = (() => new MonteCarloAiPlayer()), 
+                Name = "MonteCarlo V1",
+                PlayerFactory = (() => new MonteCarloAiPlayer()),
                 GamePauseBehaviour = GamePauseBehaviour.Pause
             },
             new PlayerInitializer {
-                Name = "MonteCarlo V2", 
-                PlayerFactory = (() => new MonteCarloMinMaxPlayer()), 
+                Name = "MonteCarlo V2",
+                PlayerFactory = (() => new MonteCarloMinMaxPlayer()),
                 GamePauseBehaviour = GamePauseBehaviour.Pause
             }
         };
@@ -99,7 +100,7 @@ namespace CombinatorialGameFrontend {
             }
         }
 
-        private void SubmitButton_OnClick(object sender, RoutedEventArgs e) {
+        private void StartDemo_OnClick(object sender, RoutedEventArgs e) {
             try {
                 StartGame(ValidateInputs());
             }
@@ -108,7 +109,7 @@ namespace CombinatorialGameFrontend {
             }
         }
 
-        private (GameManager, GamePauseBehaviour[]) ValidateInputs() {
+        private (GameManager, GamePauseBehaviour[]) ValidateInputs(bool demoMode = true) {
             int n;
             try {
                 n = int.Parse(NTextbox.Text);
@@ -131,21 +132,79 @@ namespace CombinatorialGameFrontend {
             if (k > n)
                 throw new ArgumentException("k must not be greater then n");
 
-            var player1 = Player1Box.SelectedItem as PlayerInitializer;
-            var player2 = Player2Box.SelectedItem as PlayerInitializer;
 
-            if ((player1!.Name == "Simple MinMax" || player2!.Name == "Simple MinMax") && n > 11)
+            var player1Factory = Player1Box.SelectedItem as PlayerInitializer;
+            var player2Factory = Player2Box.SelectedItem as PlayerInitializer;
+
+            var player1 = player1Factory!.PlayerFactory();
+            var player2 = player2Factory!.PlayerFactory();
+
+            if ((player1 is MinMaxAiPlayer || player2 is MinMaxAiPlayer) && n > 11)
                 throw new ArgumentException(
                     "Simple MinMax is the simplest AI, which literally solves the provided game. " +
                     "Using it on N greater then 11 would result in extremely long loading times."
                 );
 
+            if (!demoMode && (player1 is UserGamePlayer || player2 is UserGamePlayer))
+                throw new ArgumentException("Human player is not allowed in test mode.");
+
             return (new GameManager(
-                player1!.PlayerFactory(),
-                player2!.PlayerFactory(),
+                player1,
+                player2,
                 new SimpleGameController(n, k),
-                true
-            ), new[] { player1!.GamePauseBehaviour, player2!.GamePauseBehaviour });
+                demoMode
+            ), new[] { player1Factory!.GamePauseBehaviour, player2Factory!.GamePauseBehaviour });
+        }
+
+        private int GetNumberOfGames() {
+            int g;
+            try {
+                g = int.Parse(NGamesBox.Text);
+            }
+            catch {
+                throw new ArgumentException("Number of games is not a valid integer");
+            }
+            if (g <= 0)
+                throw new ArgumentException("Number of games must be greater then zero");
+
+            return g;
+        }
+
+        private async void StartTest_OnClick(object sender, RoutedEventArgs e) {
+            try {
+                var manager = ValidateInputs(false).Item1;
+                var gameCount = GetNumberOfGames();
+
+                var res = await TestGames(manager, gameCount);
+
+                ResultText.Text = $"Player 1 wins: {res.Item1}\nPlayer 2 wins: {res.Item2}\nTies: {res.Item3}";
+            }
+            catch (ArgumentException err) {
+                ErrorText.Text = err.Message;
+            }
+        }
+
+        private async Task<(int, int, int)> TestGames(GameManager manager, int gameCount) {
+            int wins = 0, losses = 0, ties = 0;
+
+            for (int i = 0; i < gameCount; i++) {
+                var victory = await manager.PlayGame();
+                switch (victory.Winner) {
+                    case 1:
+                        wins++;
+                        break;
+                    case -1:
+                        losses++;
+                        break;
+                    case null:
+                        ties++;
+                        break;
+                }
+
+                manager.RestartGame();
+            }
+
+            return (wins, losses, ties);
         }
     }
 }
