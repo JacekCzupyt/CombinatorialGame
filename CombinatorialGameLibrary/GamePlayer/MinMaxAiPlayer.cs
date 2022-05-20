@@ -8,14 +8,18 @@ using CombinatorialGameLibrary.GameManagement;
 
 namespace CombinatorialGameLibrary.GamePlayer {
     public class MinMaxAiPlayer : IGamePlayer {
+        protected CancellationToken _token;
+        
         public Task<int> RequestMove(MoveRequest request, CancellationToken token) {
+            _token = token;
             var controller = new SimpleGameController(request.GameState);
             return Task.Run(() => MinMax(controller).Item1, token);
         }
 
         //TODO: translations
 
-        public static (int, int) MinMax(IGameController controller) {
+        public (int, int) MinMax(IGameController controller) {
+            _token.ThrowIfCancellationRequested();
             int currentPlayer = controller.ActivePlayer;
 
             int bestResVal = Int32.MinValue, bestResInd = -1;
@@ -42,7 +46,8 @@ namespace CombinatorialGameLibrary.GamePlayer {
             return (bestResInd, bestResVal);
         }
 
-        private static int TestMove(IGameController controller, int move) {
+        private int TestMove(IGameController controller, int move) {
+            _token.ThrowIfCancellationRequested();
             var victoryState = controller.MakeMove(move);
             int res;
             if (victoryState.GameEnded) {

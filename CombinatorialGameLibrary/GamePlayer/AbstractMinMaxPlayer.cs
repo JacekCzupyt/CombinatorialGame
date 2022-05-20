@@ -14,16 +14,20 @@ namespace CombinatorialGameLibrary.GamePlayer {
         private readonly float? _maxTime;
         private int totalEvaluations = 0;
 
+        protected CancellationToken _token;
+
         protected AbstractMinMaxPlayer(int? maxDepth = null, float? maxTime = 5) {
             _maxDepth = maxDepth;
             _maxTime = maxTime;
         }
         public Task<int> RequestMove(MoveRequest request, CancellationToken token) {
+            _token = token;
             var controller = new SimpleGameController(request.GameState);
             return Task.Run(() => PrepareMinMax(controller), token);
         }
 
         private int PrepareMinMax(IGameController controller) {
+            _token.ThrowIfCancellationRequested();
             int depth = Int32.MaxValue;
 
             if (_maxTime.HasValue) {
@@ -63,6 +67,7 @@ namespace CombinatorialGameLibrary.GamePlayer {
         }
 
         private (int, float) MinMax(IGameController controller, int depth, float alphaBetaThreshold = float.PositiveInfinity) {
+            _token.ThrowIfCancellationRequested();
             int currentPlayer = controller.ActivePlayer;
 
             float bestResVal = float.NegativeInfinity;
@@ -92,6 +97,7 @@ namespace CombinatorialGameLibrary.GamePlayer {
         }
 
         private float TestMove(IGameController controller, int move, int depth, float bestVal) {
+            _token.ThrowIfCancellationRequested();
             var victoryState = controller.MakeMove(move);
             float res;
             if (victoryState.GameEnded) {

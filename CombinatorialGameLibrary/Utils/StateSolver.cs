@@ -9,7 +9,7 @@ namespace CombinatorialGameLibrary.Utils {
 
             var game = new SimpleGameController(n, k);
 
-            var minmax = MinMaxAiPlayer.MinMax(game);
+            var minmax = new MinMaxAiPlayer().MinMax(game);
 
             return minmax.Item2;
         }

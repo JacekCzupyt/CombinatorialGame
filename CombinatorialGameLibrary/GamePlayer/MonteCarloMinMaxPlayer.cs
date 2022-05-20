@@ -9,7 +9,7 @@ namespace CombinatorialGameLibrary.GamePlayer {
             evaluator = new MonteCarloEvaluationFunction(monteCarloCount, monteCarloTime, dynamicTime);
         }
         protected override float EvaluateMove(IGameState state) {
-            return evaluator.EvaluatePosition(state);
+            return evaluator.EvaluatePosition(state, _token);
         }
     }
 }

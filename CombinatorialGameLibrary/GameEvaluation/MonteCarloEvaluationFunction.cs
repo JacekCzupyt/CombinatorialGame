@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using CombinatorialGameLibrary.GameState;
 
 namespace CombinatorialGameLibrary.GameEvaluation {
@@ -12,7 +13,7 @@ namespace CombinatorialGameLibrary.GameEvaluation {
         private readonly Random _rng;
 
         public MonteCarloEvaluationFunction(int? count = 1000, float? time = null, float? dynamicTime = null, Random rng = null) {
-            if (!count.HasValue && !time.HasValue)
+            if (!count.HasValue && !time.HasValue && !dynamicTime.HasValue)
                 throw new ArgumentException("Time and count can't both be null");
 
             _count = count;
@@ -30,7 +31,8 @@ namespace CombinatorialGameLibrary.GameEvaluation {
         private int p;
         private int k;
 
-        public float EvaluatePosition(IGameState state) {
+        public float EvaluatePosition(IGameState state, CancellationToken token = default) {
+            token.ThrowIfCancellationRequested();
             _gameList = new List<int>(state.GameList);
 
             _moveOrder = new List<int>(new int[state.N]);
@@ -52,7 +54,8 @@ namespace CombinatorialGameLibrary.GameEvaluation {
 
             while (!(watch.Elapsed.TotalSeconds >= _time ||
                        i >= _count ||
-                       watch.Elapsed.TotalSeconds > _dynamicTime / _availableTiles.Count)) {
+                       watch.Elapsed.TotalSeconds > _dynamicTime / _availableTiles.Count ||
+                       token.IsCancellationRequested)) {
                 var res = PreformMonteCarloRun();
                 sum += res;
                 i++;

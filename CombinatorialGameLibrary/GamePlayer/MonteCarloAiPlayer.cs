@@ -8,14 +8,14 @@ using CombinatorialGameLibrary.GameManagement;
 
 namespace CombinatorialGameLibrary.GamePlayer
 {
-    public class MonteCarloAiPlayer : IGamePlayer
-    {
-        public Task<int> RequestMove(MoveRequest request, CancellationToken token)
-        {
+    public class MonteCarloAiPlayer : IGamePlayer {
+        private CancellationToken _token;
+        public Task<int> RequestMove(MoveRequest request, CancellationToken token) {
+            _token = token;
             var controller = new SimpleGameController(request.GameState);
             return Task.Run(() => bestResInd(controller), token);
         }
-        public static int bestResInd(IGameController controller)
+        public int bestResInd(IGameController controller)
         {
             List<int> availableIdxs = controller.getAvailableIdxs();
             List<int> wins = getProbabilityList(controller, availableIdxs);
@@ -45,7 +45,7 @@ namespace CombinatorialGameLibrary.GamePlayer
 
         }
 
-        protected static List<int> getProbabilityList(IGameController controller, List<int> availableIdxs)
+        protected List<int> getProbabilityList(IGameController controller, List<int> availableIdxs)
         {
             List<int> probabilityList = new List<int>();
             for (int i = 0; i < controller.GameList.Count; i++)
@@ -59,6 +59,7 @@ namespace CombinatorialGameLibrary.GamePlayer
                 testedMove = availableIdxs[j];
                 for (int i = 0; i < n_iter; i++)
                 {
+                    _token.ThrowIfCancellationRequested();
                     SimpleGameController tempGame = (SimpleGameController)controller.Clone();
                     int activePlayer = tempGame.ActivePlayer;
                     tempGame.MakeMove(testedMove);
