@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,6 +11,7 @@ using System.Xml;
 using CombinatorialGameLibrary.GameController;
 using CombinatorialGameLibrary.GameManagement;
 using CombinatorialGameLibrary.GamePlayer;
+using CombinatorialGameLibrary.GameState;
 
 namespace CombinatorialGameFrontend {
     /// <summary>
@@ -101,6 +103,7 @@ namespace CombinatorialGameFrontend {
         }
 
         private void StartDemo_OnClick(object sender, RoutedEventArgs e) {
+            ErrorText.Text = null;
             try {
                 StartGame(ValidateInputs());
             }
@@ -170,24 +173,63 @@ namespace CombinatorialGameFrontend {
             return g;
         }
 
+
         private async void StartTest_OnClick(object sender, RoutedEventArgs e) {
+            ErrorText.Text = null;
             try {
                 var manager = ValidateInputs(false).Item1;
                 var gameCount = GetNumberOfGames();
-
-                var res = await TestGames(manager, gameCount);
-
-                ResultText.Text = $"Player 1 wins: {res.Item1}\nPlayer 2 wins: {res.Item2}\nTies: {res.Item3}";
+                
+                await InitializeTestGames(manager, gameCount);
             }
             catch (ArgumentException err) {
                 ErrorText.Text = err.Message;
             }
         }
 
-        private async Task<(int, int, int)> TestGames(GameManager manager, int gameCount) {
+        private CancellationTokenSource testCancellationTokenSource;
+
+        private async Task InitializeTestGames(GameManager manager, int gameCount) {
+            StartTestButton.IsEnabled = false;
+            StartDemoButton.IsEnabled = false;
+            ProgressBarGrid.Visibility = Visibility.Visible;
+            ProgressBar.Value = 0;
+            ProgressBarText.Text = $"0 / {gameCount}";
+            CancelButton.Visibility = Visibility.Visible;
+            
+            testCancellationTokenSource = new CancellationTokenSource();
+            var progress = new Progress<(int, int, int, int)>();
+            progress.ProgressChanged += (sender, data) => {
+                var (_games, _wins, _losses, _ties) = data;
+                ProgressBar.Value = 100f * _games / gameCount;
+                ProgressBarText.Text = $"{_games} / {gameCount}";
+                ResultText.Text = $"Player 1 wins: {_wins}\nPlayer 2 wins: {_losses}\nTies: {_ties}";
+            };
+
+            var (wins, losses, ties) = await TestGames(manager, gameCount, testCancellationTokenSource.Token, progress);
+            
+            StartTestButton.IsEnabled = true;
+            StartDemoButton.IsEnabled = true;
+            ProgressBarGrid.Visibility = Visibility.Collapsed;
+            CancelButton.Visibility = Visibility.Collapsed;
+            
+            ResultText.Text = $"Player 1 wins: {wins}\nPlayer 2 wins: {losses}\nTies: {ties}";
+        }
+
+        private async Task<(int, int, int)> TestGames(GameManager manager, int gameCount, CancellationToken token, IProgress<(int, int, int, int)> progress) {
             int wins = 0, losses = 0, ties = 0;
 
-            for (int i = 0; i < gameCount; i++) {
+            token.Register(
+                () => {
+                    try {
+                        manager.CancelGame();
+                    }
+                    catch (InvalidOperationException) {
+                    }
+                }
+            );
+
+            for (int i = 0; i < gameCount && !token.IsCancellationRequested; i++) {
                 var victory = await manager.PlayGame();
                 switch (victory.Winner) {
                     case 1:
@@ -196,15 +238,18 @@ namespace CombinatorialGameFrontend {
                     case -1:
                         losses++;
                         break;
-                    case null:
+                    case 0:
                         ties++;
                         break;
                 }
-
                 manager.RestartGame();
+                progress.Report((i + 1, wins, losses, ties));
             }
 
             return (wins, losses, ties);
+        }
+        private void CancelButton_OnClick(object sender, RoutedEventArgs e) {
+            testCancellationTokenSource?.Cancel();
         }
     }
 }

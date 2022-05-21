@@ -41,16 +41,28 @@
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="5px">Player 2</TextBlock>
         <ComboBox Grid.Row="3" Grid.Column="1" Margin="5px" x:Name="Player2Box"/>
 
-        <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="5px" Click="StartDemo_OnClick">Start Demo</Button>
+        <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="5px" Click="StartDemo_OnClick" x:Name="StartDemoButton">
+            Start Demo
+        </Button>
         
         <TextBlock Grid.Row="5" Grid.Column="0" Margin="5px">Number of games</TextBlock>
         <TextBox Grid.Row="5" Grid.Column="1" x:Name="NGamesBox" Margin="5px"
                  DataObject.Pasting="TextBoxPasting" PreviewTextInput="PreviewTextInputHandler"
                  Text="3"/>
         
-        <Button Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Margin="5px" Click="StartTest_OnClick">Start Test</Button>
+        <Button Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Margin="5px" Click="StartTest_OnClick" x:Name="StartTestButton">
+            Start Test
+        </Button>
         
-        <TextBlock Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Margin="5px" Foreground="Green" x:Name="ResultText"/>
+        <StackPanel Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2">
+            <Grid Height="20" Margin="5px" Visibility="Collapsed" x:Name="ProgressBarGrid">
+                <ProgressBar x:Name="ProgressBar" Value="50"/>
+                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="ProgressBarText">Text</TextBlock>
+            </Grid>
+            <Button Margin="5px" x:Name="CancelButton" Visibility="Collapsed" Click="CancelButton_OnClick">Cancel</Button>
+            <TextBlock Margin="5px" Foreground="Green" x:Name="ResultText"/>
+        </StackPanel>
+        
         
         <TextBlock Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Margin="5px" Foreground="Red" x:Name="ErrorText"/>
     </Grid>
