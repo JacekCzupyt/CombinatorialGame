@@ -125,7 +125,7 @@ namespace CombinatorialGameLibrary.GameManagement {
         public void CancelGame() {
             if (!GameInProgress)
                 throw new InvalidOperationException("Can not cancel game which is not in progress");
-            gamePause.TrySetCanceled();
+            gamePause?.TrySetCanceled();
             gameTokenSource.Cancel();
         }
 
@@ -141,6 +141,7 @@ namespace CombinatorialGameLibrary.GameManagement {
             Exception err = null;
             while (true) {
                 try {
+                    token.ThrowIfCancellationRequested();
                     var requestData = new MoveRequest(GameState, GameState.ActivePlayer, err);
                     var moveRequest = _players[_gameController.ActivePlayer].RequestMove(requestData, token);
                     int move = await moveRequest;
